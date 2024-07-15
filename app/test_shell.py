@@ -1,4 +1,3 @@
-from app.advanced_logic import AdvancedLogic
 from app.basic_logic import BasicLogic
 from app.test_app.test_app_1 import TestApp1
 from app.test_app.test_app_2 import TestApp2
@@ -28,7 +27,7 @@ class TestShell:
 
 
 if __name__ == '__main__':
-    logic = AdvancedLogic()
+    logic = BasicLogic()
     app = TestShell(logic)
     while True:
         inp = input()

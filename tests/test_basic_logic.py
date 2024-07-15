@@ -1,7 +1,7 @@
 from unittest import TestCase, skip
 
 
-class TestAdvancedLogic(TestCase):
+class TestBasicLogic(TestCase):
     def test_read(self):
         pass
 
