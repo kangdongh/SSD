@@ -3,5 +3,5 @@ from abc import ABC, abstractmethod
 
 class ISSDWriter(ABC):
     @abstractmethod
-    def write(self, logical_bytes_address: int):
+    def write(self, write_file_name: str, logical_bytes_address: int, data_to_write: str):
         pass
