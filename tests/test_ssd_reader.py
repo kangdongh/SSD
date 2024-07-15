@@ -2,4 +2,5 @@ from unittest import TestCase
 
 
 class TestSSDReader(TestCase):
-    pass
+    def test_read(self):
+        pass

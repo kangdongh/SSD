@@ -2,4 +2,5 @@ from unittest import TestCase
 
 
 class TestSSDWriter(TestCase):
-    pass
+    def test_write(self):
+        pass

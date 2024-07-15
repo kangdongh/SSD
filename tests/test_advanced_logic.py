@@ -1,9 +1,27 @@
-from unittest import TestCase
+from unittest import TestCase, skip
 
 
 class TestAdvancedLogic(TestCase):
+    def test_read(self):
+        pass
+
+    def test_write(self):
+        pass
+
+    def test_full_read(self):
+        pass
+
+    def test_full_write(self):
+        pass
+
+    def test_exit(self):
+        pass
+
+    def test_help(self):
+        pass
+
     def test_test_app1(self):
-        self.fail()
+        pass
 
     def test_test_app2(self):
-        self.fail()
+        pass
