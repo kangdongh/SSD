@@ -4,7 +4,7 @@ from app.test_app.test_app_2 import TestApp2
 from app.test_app.test_app_interface import ITestApp
 
 COMMAND_LIST = ['read', 'write', 'exit', 'help', 'fullread', 'fullwrite', 'testapp1', 'testapp2']
-
+INVALID_CMD = "INVALID COMMAND"
 class TestShell:
     _logic: BasicLogic
     _test_app1: ITestApp
@@ -14,6 +14,9 @@ class TestShell:
         self._logic = BasicLogic(path)
         self._test_app1 = TestApp1()
         self._test_app2 = TestApp2()
+
+    def _check_cmd_length(self, cmds):
+        pass
 
     def _check_cmd(self):
         pass
@@ -25,9 +28,9 @@ class TestShell:
         pass
 
     def is_valid_command(self, cmd):
-        if cmd == 'read' or cmd == 'read 0' or cmd == 'write 3 0xAAAAAAAA':
+        if cmd == 'help' or cmd == 'read 1' or cmd == 'read 0' or cmd == 'write 3 0xAAAAAAAA':
             return 1
-        if cmd == 'cmd1' or cmd == 'read 101' or cmd == 'write 3 0xAAAAAAAZ':
+        if cmd == 'read' or cmd == 'cmd1' or cmd == 'read 101' or cmd == 'write 3 0xAAAAAAAZ':
             return "INVALID COMMAND"
 
     def run(self, line) -> bool:
@@ -48,6 +51,7 @@ if __name__ == '__main__':
     while True:
         try:
             inp = input()
+            inp = inp.lower()
             # validation
             if not app.is_valid_command(inp):
                 print("INVALID COMMAND")

@@ -7,8 +7,14 @@ class TestTestShell(TestCase):
     def setUp(self):
         self.sut = TestShell("test")
 
+    def test_check_valid_cmd_length(self):
+        self.assertEqual(1, self.sut.is_valid_command("help"))
+
+    def test_check_invalid_cmd_length(self):
+        self.assertEqual("INVALID COMMAND", self.sut.is_valid_command("read"))
+
     def test_check_valid_cmd(self):
-        self.assertEqual(1, self.sut.is_valid_command("read"))
+        self.assertEqual(1, self.sut.is_valid_command("read 1"))
 
     def test_check_invalid_cmd(self):
         self.assertEqual("INVALID COMMAND", self.sut.is_valid_command("cmd1"))
