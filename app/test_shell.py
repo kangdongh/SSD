@@ -3,16 +3,32 @@ from app.test_app.test_app_1 import TestApp1
 from app.test_app.test_app_2 import TestApp2
 from app.test_app.test_app_interface import ITestApp
 
+COMMAND_LIST = ['read', 'write', 'exit', 'help', 'fullread', 'fullwrite', 'testapp1', 'testapp2']
 
 class TestShell:
     _logic: BasicLogic
     _test_app1: ITestApp
     _test_app2: ITestApp
 
-    def __init__(self, logic: BasicLogic, test_app1: ITestApp, test_app2: ITestApp):
-        self._logic = logic
-        self._test_app1 = test_app1
-        self._test_app2 = test_app2
+    def __init__(self, path):
+        self._logic = BasicLogic(path)
+        self._test_app1 = TestApp1()
+        self._test_app2 = TestApp2()
+
+    def _check_cmd(self):
+        pass
+
+    def _check_address(self):
+        pass
+
+    def _check_value(self):
+        pass
+
+    def is_valid_command(self, cmd):
+        if cmd == 'read' or cmd == 'read 0' or cmd == 'write 3 0xAAAAAAAA':
+            return 1
+        if cmd == 'cmd1' or cmd == 'read 101' or cmd == 'write 3 0xAAAAAAAZ':
+            return "INVALID COMMAND"
 
     def run(self, line) -> bool:
         # Call _app.methods
@@ -25,10 +41,20 @@ if __name__ == '__main__':
 
     current_file_abspath = os.path.abspath(__file__)
     ssd_path = os.path.join(current_file_abspath, '../hardware/ssd.py')
-    basic_logic = BasicLogic(ssd_path)
-    app = TestShell(basic_logic, TestApp1(), TestApp2())
+
+    app = TestShell(ssd_path)
+
+
     while True:
-        inp = input()
-        exit_condition = app.run(inp)
-        if exit_condition:
-            break
+        try:
+            inp = input()
+            # validation
+            if not app.is_valid_command(inp):
+                print("INVALID COMMAND")
+                continue
+
+            exit_condition = app.run(inp)
+            if exit_condition:
+                break
+        except Exception as e:
+            print(str(e))
