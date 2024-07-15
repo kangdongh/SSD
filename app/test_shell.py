@@ -3,8 +3,10 @@ from app.test_app.test_app_1 import TestApp1
 from app.test_app.test_app_2 import TestApp2
 from app.test_app.test_app_interface import ITestApp
 
-COMMAND_LIST = ['read', 'write', 'exit', 'help', 'fullread', 'fullwrite', 'testapp1', 'testapp2']
+COMMAND_LIST = ['READ', 'WRITE', 'EXIT', 'HELP', 'FULLREAD', 'FULLWRITE', 'TESTAPP1', 'TESTAPP2']
 INVALID_CMD = "INVALID COMMAND"
+
+
 class TestShell:
     _logic: BasicLogic
     _test_app1: ITestApp
@@ -15,23 +17,64 @@ class TestShell:
         self._test_app1 = TestApp1()
         self._test_app2 = TestApp2()
 
-    def _check_cmd_length(self, cmds):
-        pass
+    def _get_integer(self, value):
+        try:
+            return int(value)
+        except ValueError:
+            return -1
 
-    def _check_cmd(self):
-        pass
+    def _get_hex(self, value):
+        try:
+            return int(value, 16)
+        except ValueError:
+            return -1
 
-    def _check_address(self):
-        pass
+    def _is_valid_cmd_length(self, cmds):
+        if len(cmds) == 0:
+            return False
+        if cmds[0] in ['EXIT', 'HELP', 'FULLREAD'] and len(cmds) != 1:
+            return False
+        if cmds[0] in ['READ', 'FULLWRITE'] and len(cmds) != 2:
+            return False
+        if cmds[0] in ['WRITE'] and len(cmds) != 3:
+            return False
+        return True
 
-    def _check_value(self):
-        pass
+    def _is_valid_cmd(self, cmd):
+        if cmd in COMMAND_LIST:
+            return True
+        return False
+
+    def _is_valid_address(self, cmd):
+        if cmd[0] not in ['WRITE', 'READ']:
+            return True
+        address = self._get_integer(cmd[1])
+        if address < 0 or address > 99:
+            return False
+        return True
+
+    def _is_valid_value(self, cmd):
+        bytes = None
+        if cmd[0] == 'WRITE':
+            bytes = cmd[2]
+        elif cmd[0] == 'FULLWRITE':
+            bytes = cmd[1]
+        else:
+            return True
+        if len(bytes) != 10:
+            return False
+        if bytes[:2] != '0X':
+            return False
+        return self._get_hex(bytes[2:]) > 0
 
     def is_valid_command(self, cmd):
-        if cmd == 'help' or cmd == 'read 1' or cmd == 'read 0' or cmd == 'write 3 0xAAAAAAAA':
-            return 1
-        if cmd == 'read' or cmd == 'cmd1' or cmd == 'read 101' or cmd == 'write 3 0xAAAAAAAZ':
-            return "INVALID COMMAND"
+        cmd = cmd.upper()
+        cmd_split = cmd.split(" ")
+
+        return self._is_valid_cmd_length(cmd_split) and \
+            self._is_valid_cmd(cmd_split[0]) and \
+            self._is_valid_address(cmd_split) and \
+            self._is_valid_value(cmd_split)
 
     def run(self, line) -> bool:
         # Call _app.methods
@@ -46,7 +89,6 @@ if __name__ == '__main__':
     ssd_path = os.path.join(current_file_abspath, '../hardware/ssd.py')
 
     app = TestShell(ssd_path)
-
 
     while True:
         try:
