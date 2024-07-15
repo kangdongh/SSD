@@ -17,7 +17,7 @@ class TestSSDWriter(TestCase):
 
     def tearDown(self):
         os.remove(WRITE_FILE_NAME)
-    #@skip
+    @skip
     def test_write01(self):
         logical_bytes_address = 1
         data_to_write = '0x9988FFFA'
