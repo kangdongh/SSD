@@ -9,3 +9,7 @@ class SSD(ISSD):
     _reader: ISSDReader
     _writer: ISSDWriter
 
+if __name__ == '__main__':
+    import sys
+    ssd = SSD()
+    ssd.run(sys.argv)

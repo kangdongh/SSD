@@ -11,3 +11,13 @@ class TestShellApp:
         # Call _app.methods
         # return True for exit condition
         return True
+
+
+if __name__ == '__main__':
+    logic = AdvancedLogic()
+    app = TestShellApp(logic)
+    while True:
+        inp = input()
+        exit_condition = app.run(inp)
+        if exit_condition:
+            break
