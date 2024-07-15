@@ -29,4 +29,4 @@ class TestSSDReader(TestCase):
 
         ret = ssd_reader.read(READ_FILE_DIR, target_address)
 
-        self.assertEqual('0xAAAABBBB', ret)
+        self.assertEqual(answer, ret)
