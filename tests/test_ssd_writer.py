@@ -12,25 +12,23 @@ class TestSSDWriter(TestCase):
         super().setUp()
         self.ssd_writer = SSDWriter()
         self.file_handler = open(WRITE_FILE_NAME, 'w')
-        self.file_handler.write(INIT_VALUE)
-        self.file_handler.write(INIT_VALUE)
-        self.file_handler.write(INIT_VALUE)
+        for _ in range(100):
+            self.file_handler.write(INIT_VALUE)
         self.file_handler.close()
 
     def tearDown(self):
         os.remove(WRITE_FILE_NAME)
 
-    @skip
-    def test_write01(self):
-        logical_bytes_address = 1
+    def test_success_write_to_line01(self):
+        logical_bytes_address = 3
         data_to_write = '0x9988FFFA'
 
         self.ssd_writer.write(WRITE_FILE_NAME, logical_bytes_address, data_to_write)
         self.assertEqual(data_to_write, self.read_from_line(WRITE_FILE_NAME, logical_bytes_address))
 
     @skip
-    def test_write02(self):
-        logical_bytes_address = 2
+    def test_success_write_to_line02(self):
+        logical_bytes_address = 99
         data_to_write = '0x9988FFFB'
 
         self.ssd_writer.write(WRITE_FILE_NAME, logical_bytes_address, data_to_write)
