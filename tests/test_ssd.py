@@ -1,6 +1,5 @@
 import os
-from unittest import TestCase, skip
-from unittest.mock import patch
+from unittest import TestCase
 
 from hardware.ssd import SSD
 from hardware.ssd_reader import SSDReader
