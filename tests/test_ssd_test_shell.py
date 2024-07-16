@@ -11,7 +11,7 @@ from app.ssd_test_shell import SSDTestShell, CommandValidator
 
 class TestSSDTestShell(TestCase):
     def setUp(self):
-        self.mk_basic = MagicMock(BasicLogic("test"))
+        self.mk_basic = MagicMock(BasicLogic)
         self.mk_test_app_1 = MagicMock(TestApp1)
         self.mk_test_app_2 = MagicMock(TestApp2)
         self.validator = CommandValidator()
