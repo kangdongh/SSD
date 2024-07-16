@@ -17,18 +17,10 @@ class BasicLogic:
         pass
 
     def help(self) -> str:
-        help_str = """
-        ****************************************
-        ********** COMMAND HELP **********
-        ****************************************
-        1. ** write: Write value to SSD / usage: write <LBA> <VALUE>
-        2. ** read: Read value from SSD / usage: read <LBA>
-        3. ** exit: Exit program / usage exit
-        4. ** help: Help command
-        5. ** fullwrite: Write value at all LBAs / usage: fullwrite <VALUE>
-        6. ** fullread: Read all LBAs / usage: fullread
-        ****************************************
-                """
+        help_str = ""
+
+        with open('./help_description.txt', 'r') as file:
+            help_str = file.read()
 
         print(f'{help_str}')
         return help_str
