@@ -1,5 +1,5 @@
 from unittest import TestCase
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock
 
 from app.basic_logic import BasicLogic
 from app.test_app.test_app_1 import TestApp1
@@ -63,7 +63,6 @@ class TestTestShell(TestCase):
         self.assertEqual(False, self.sut.is_valid_command("write 3 0xAA1"))
         self.assertEqual(False, self.sut.is_valid_command("write 3 0xAA123243421"))
 
-
     def test_run_exit(self):
         self.assertEqual(-1, self.sut.run('EXIT'))
 
@@ -74,11 +73,11 @@ class TestTestShell(TestCase):
 
     def test_run_read(self):
         self.mk_basic.read.return_value = 'return read value'
-        self.sut.run('READ', ['ADDR'])
+        self.sut.run('READ ADDR')
         self.assertEqual(1, self.mk_basic.read.call_count)
 
     def test_run_write(self):
-        self.sut.run('WRITE', ['ADDR', 'VALUE'])
+        self.sut.run('WRITE ADDR VALUE')
         self.assertEqual(1, self.mk_basic.write.call_count)
 
     def test_run_fullread(self):
@@ -87,7 +86,7 @@ class TestTestShell(TestCase):
         self.assertEqual(1, self.mk_basic.full_read.call_count)
 
     def test_run_fullwrite(self):
-        self.sut.run('FULLWRITE', ['VALUE'])
+        self.sut.run('FULLWRITE VALUE')
         self.assertEqual(1, self.mk_basic.full_write.call_count)
 
     def test_run_testapp1(self):

@@ -77,21 +77,18 @@ class TestShell:
         cmd = cmd.upper()
         cmd_split = cmd.split(" ")
 
-        if self._is_valid_cmd_length(cmd_split) and \
-                self._is_valid_cmd(cmd_split[0]) and \
-                self._is_valid_address(cmd_split) and \
-                self._is_valid_value(cmd_split):
-            self._set_command(cmd_split)
-            return True
-        else:
-            return False
+        return self._is_valid_cmd_length(cmd_split) and \
+            self._is_valid_cmd(cmd_split[0]) and \
+            self._is_valid_address(cmd_split) and \
+            self._is_valid_value(cmd_split)
 
     def _set_command(self, cmd_split):
         self._cmd = cmd_split[0]
         self._params = cmd_split[1:] if len(cmd_split) > 1 else None
 
-    def run(self) -> int:
+    def run(self, cmd) -> int:
         # Call _app.methods
+        self._set_command(cmd.split(" "))
         # return -1 for exit condition
         if self._cmd == 'EXIT':
             return -1
