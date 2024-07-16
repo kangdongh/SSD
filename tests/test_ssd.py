@@ -60,16 +60,16 @@ class TestSSD(TestCase):
         with self.subTest("INVALID VALUE"):
             self.assert_ssd_run_raises(['ssd', 'W', '2', '0xAABBCCGG'])
 
-    @skip
-    @patch.object(SSDReader, 'read')
-    def test_run_read(self, read_fn):
+    def test_run_read(self):
         with open(TEST_DATA_FILE_PATH, 'w') as data_file:
-            data_file.write('0x00000000\n0x00000000\n0x00000002')
-        read_fn.side_effect = lambda x: '0x00000002' if x == 2 else '0x00000000'
+            data_file.write('0x00000000\n0x00000000\n0x00000002\n')
+            for _ in range(97):
+                data_file.write(INITIAL_DATA_VALUE + '\n')
+
         self.ssd.run(['ssd', 'R', '2'])
 
         with open(TEST_RESULT_FILE_PATH, 'r') as result_file:
-            self.assertEqual('0x00000002', result_file.readline())
+            self.assertEqual('0x00000002', result_file.readline().strip())
 
     @skip
     @patch.object(SSDWriter, 'write')
