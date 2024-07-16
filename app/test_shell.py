@@ -3,19 +3,16 @@ from app.test_app.test_app_1 import TestApp1
 from app.test_app.test_app_2 import TestApp2
 from app.test_app.test_app_interface import ITestApp
 
-COMMAND_LIST = ['READ', 'WRITE', 'EXIT', 'HELP', 'FULLREAD', 'FULLWRITE', 'TESTAPP1', 'TESTAPP2']
+COMMAND_LIST = ['READ', 'WRITE', 'EXIT', 'HELP', 'FULLREAD', 'FULLWRITE']
+TESTAPP_LIST = ['TESTAPP1', 'TESTAPP2']
 INVALID_CMD = "INVALID COMMAND"
 
 
 class TestShell:
-    _logic: BasicLogic
-    _test_app1: ITestApp
-    _test_app2: ITestApp
-
     def __init__(self, basic_logic):
-        self._logic = basic_logic
-        self._test_app1 = None
-        self._test_app2 = None
+        self._logic: BasicLogic = basic_logic
+        self._test_app1: ITestApp = None
+        self._test_app2: ITestApp = None
         self._cmd = None
         self._params = None
 
@@ -38,7 +35,7 @@ class TestShell:
     def _is_valid_cmd_length(self, cmds):
         if len(cmds) == 0:
             return False
-        if cmds[0] in ['EXIT', 'HELP', 'FULLREAD'] and len(cmds) != 1:
+        if cmds[0] in ['EXIT', 'HELP', 'FULLREAD', 'TESTAPP1', 'TESTAPP2'] and len(cmds) != 1:
             return False
         if cmds[0] in ['READ', 'FULLWRITE'] and len(cmds) != 2:
             return False
@@ -47,7 +44,7 @@ class TestShell:
         return True
 
     def _is_valid_cmd(self, cmd):
-        if cmd in COMMAND_LIST:
+        if cmd in COMMAND_LIST or cmd in TESTAPP_LIST:
             return True
         return False
 
