@@ -62,7 +62,7 @@ class CommandValidator:
         return self._get_hex(bytes[2:]) > 0
 
 
-class TestShell:
+class SSDTestShell:
     INVALID_CMD = "INVALID COMMAND"
 
     def __init__(self, basic_logic: BasicLogic, validator: CommandValidator, test_app1=None, test_app2=None):
@@ -122,7 +122,7 @@ def main():
 
     basic_logic = BasicLogic(ssd_path)
     validator = CommandValidator()
-    shell = TestShell(basic_logic, validator)
+    shell = SSDTestShell(basic_logic, validator)
 
     test_app1 = TestApp1()
     test_app2 = TestApp2()

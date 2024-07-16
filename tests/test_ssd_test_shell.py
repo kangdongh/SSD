@@ -6,16 +6,16 @@ from unittest.mock import MagicMock
 from app.basic_logic import BasicLogic
 from app.test_app.test_app_1 import TestApp1
 from app.test_app.test_app_2 import TestApp2
-from app.test_shell import TestShell, CommandValidator
+from app.ssd_test_shell import SSDTestShell, CommandValidator
 
 
-class TestTestShell(TestCase):
+class TestSSDTestShell(TestCase):
     def setUp(self):
         self.mk_basic = MagicMock(BasicLogic("test"))
         self.mk_test_app_1 = MagicMock(TestApp1)
         self.mk_test_app_2 = MagicMock(TestApp2)
         self.validator = CommandValidator()
-        self.sut = TestShell(self.mk_basic, self.validator)
+        self.sut = SSDTestShell(self.mk_basic, self.validator)
         self.sut.set_apps(self.mk_test_app_1, self.mk_test_app_2)
 
     def test_check_valid_cmd_length(self):
