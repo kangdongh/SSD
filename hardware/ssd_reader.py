@@ -1,9 +1,6 @@
 import os
 from hardware.ssd_reader_interface import ISSDReader
 
-READ_RESULT_FILE = './result.txt'
-
-
 class SSDReader(ISSDReader):
 
     def read(
@@ -11,9 +8,7 @@ class SSDReader(ISSDReader):
             read_file_name,
             logical_bytes_address: int
     ) -> str:
-        line_content = self.read_from_line(read_file_name, logical_bytes_address)
-        self.write_read_result(READ_RESULT_FILE, line_content)
-        return line_content
+        return self.read_from_line(read_file_name, logical_bytes_address)
 
     def read_from_line(self, read_file_name, logical_bytes_address) -> str:
 
@@ -30,16 +25,3 @@ class SSDReader(ISSDReader):
 
         except FileExistsError:
             print(f'{read_file_name} 파일이 존재하지 않습니다.')
-
-    def write_read_result(self, write_file_name, read_result):
-
-        try:
-            with open("write_file_name", "w") as file_handler:
-                file_handler.write(read_result)
-                file_handler.close()
-        except IOError as e:
-            print(f"IOError 발생: {e}")
-        except OSError as e:
-            print(f"OSError 발생: {e}")
-        except Exception as e:
-            print(f"예기치 않은 예외 발생: {e}")
