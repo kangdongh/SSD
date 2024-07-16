@@ -24,9 +24,8 @@ class TestSSDReader(TestCase):
     @skip
     def test_read(self):
         ssd_reader = SSDReader()
-        target_address = randint(0, 99)
-        answer = VALUE_FIRST if target_address < 50 else VALUE_SECOND
 
-        ret = ssd_reader.read(READ_FILE_DIR, target_address)
-
-        self.assertEqual(answer, ret)
+        for target_address in range(100):
+            answer = VALUE_FIRST if target_address < 50 else VALUE_SECOND
+            ret = ssd_reader.read(READ_FILE_DIR, target_address)
+            self.assertEqual(answer, ret)

@@ -28,20 +28,24 @@ class TestSSD(TestCase):
             for _ in range(100):
                 self.assertEqual(INITIAL_DATA_VALUE, data_file.readline())
 
+    def assert_ssd_run_raises(self, args):
+        with self.assertRaises(Exception):
+            self.ssd.run(args)
+
     @skip
     def test_run_invalid_input_LBA(self):
-        with self.assertRaises(Exception):
-            self.ssd.run(['SSD', 'W', '-5'])
-        with self.assertRaises(Exception):
-            self.ssd.run(['SSD', 'R', '100'])
+        with self.subTest("LBA=-5"):
+            self.assert_ssd_run_raises(['SSD', 'W', '-5'])
+        with self.subTest("LBA=100"):
+            self.assert_ssd_run_raises(['SSD', 'W', '100'])
 
     @skip
     def test_run_invalid_input_command(self):
-        with self.assertRaises(Exception):
+        with self.subTest("INVALID TYPE"):
             self.ssd.run(['SSD', 'X', '2'])
-        with self.assertRaises(Exception):
+        with self.subTest("INVALID CHARACTER"):
             self.ssd.run(['SAD', 'R', '2'])
-        with self.assertRaises(Exception):
+        with self.subTest("INVALID VALUE"):
             self.ssd.run(['SSD', 'W', '2', '0xAABBCCGG'])
 
     @skip
