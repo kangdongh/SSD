@@ -4,7 +4,7 @@ from hardware.ssd_writer_interface import ISSDWriter
 class SSDWriter(ISSDWriter):
     def write(self, write_file_path: str, logical_bytes_address: int, data_to_write: str):
         try:
-            if not self._is_valid_data(data_to_write):
+            if not self._is_valid_address_and_data(logical_bytes_address, data_to_write):
                 raise Exception('INVALID COMMAND')
             with open(write_file_path, 'r') as file:
                 lines = file.readlines()
@@ -18,8 +18,8 @@ class SSDWriter(ISSDWriter):
         except Exception:
             raise Exception('INVALID COMMAND')
 
-    def _is_valid_data(self, data):
-        if len(data) != 10:
+    def _is_valid_address_and_data(self, address, data):
+        if address < 0 or address > 99 or len(data) != 10:
             return False
 
         if not data.startswith('0x'):
