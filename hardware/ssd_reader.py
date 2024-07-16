@@ -15,23 +15,31 @@ class SSDReader(ISSDReader):
         self.write_read_result(READ_RESULT_FILE, line_content)
         return line_content
 
-    def read_from_line(self, read_file_name, logical_bytes_address):
+    def read_from_line(self, read_file_name, logical_bytes_address) -> str:
 
         try:
-            file_handler = open(read_file_name, 'r')
-        except FileExistsError:
-            print(f'{read_file_name} 파일이 존재하지 않습니다.')
+            with open(read_file_name, 'r', encoding='utf-8') as file_handler:
+                line_content = None
+                for current_line_number, line in enumerate(file_handler, start=0):
+                    if current_line_number == logical_bytes_address:
+                        line_content = line.strip()
+                        break;
 
-        line_content = None
-
-        for current_line_number, line in enumerate(file_handler, start=0):
-            if current_line_number == logical_bytes_address:
-                line_content = line.strip()
                 file_handler.close()
                 return line_content
 
+        except FileExistsError:
+            print(f'{read_file_name} 파일이 존재하지 않습니다.')
+
     def write_read_result(self, write_file_name, read_result):
-        file_handler = open(write_file_name, 'w')
-        file_handler.write(read_result)
-        file_handler.close()
-        return
+
+        try:
+            with open("write_file_name", "w") as file_handler:
+                file_handler.write(read_result)
+                file_handler.close()
+        except IOError as e:
+            print(f"IOError 발생: {e}")
+        except OSError as e:
+            print(f"OSError 발생: {e}")
+        except Exception as e:
+            print(f"예기치 않은 예외 발생: {e}")
