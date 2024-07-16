@@ -18,9 +18,7 @@ class BasicLogic:
 
     def help(self) -> str:
         help_str = ""
-
         with open('./help_description.txt', 'r') as file:
             help_str = file.read()
 
-        print(f'{help_str}')
         return help_str
