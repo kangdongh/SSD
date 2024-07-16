@@ -4,16 +4,16 @@ class BasicLogic:
     def __init__(self, ssd_path):
         self._ssd_path = ssd_path
 
-    def read(self, args):
+    def read(self, lba: str) -> str:
         pass
 
-    def write(self, args):
+    def write(self, lba: str, value: str) -> None:
         pass
 
-    def full_read(self):
+    def full_read(self) -> str:
         pass
 
-    def full_write(self):
+    def full_write(self, value: str) -> None:
         pass
 
     def help(self) -> str:
