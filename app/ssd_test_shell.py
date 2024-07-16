@@ -1,3 +1,8 @@
+import os
+import sys
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from app.basic_logic import BasicLogic
 from app.system_call_handler import SystemCallHandler
 from app.test_app.test_app_1 import TestApp1
