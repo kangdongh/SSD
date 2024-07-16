@@ -60,7 +60,7 @@ class CommandValidator:
             return False
         if bytes[:2] != '0x':
             return False
-        return self._get_hex(bytes[2:]) > 0
+        return self._get_hex(bytes[2:]) >= 0
 
 
 class SSDTestShell:
@@ -117,7 +117,6 @@ class SSDTestShell:
 
 def main():
     import os.path
-
     current_dir_abspath = os.path.dirname(os.path.abspath(__file__))
     ssd_path = os.path.join(current_dir_abspath, '../hardware/ssd.py')
     result_file_path = os.path.join(current_dir_abspath, '../hardware/result.txt')

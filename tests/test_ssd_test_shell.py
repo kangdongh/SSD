@@ -31,13 +31,15 @@ class TestSSDTestShell(TestCase):
                 self.assertFalse(self.validator.is_valid_command(cmd))
 
     def test_check_valid_cmd(self):
-        valid_cmds = ["read 1", "write 1 0xAAAAAAAA", "exit", "Help", "FullRead", "FullWrite 0xAAAAAAAA"]
+        valid_cmds = ["read 1", "write 1 0xAAAAAAAA", "exit", "Help", "FullRead",
+                      "FullWrite 0xAAAAAAAA"]
         for cmd in valid_cmds:
             with self.subTest(cmd=cmd):
                 self.assertTrue(self.validator.is_valid_command(cmd))
 
     def test_check_invalid_cmd(self):
-        invalid_cmds = ["cmd1", "readwrite", "full_read", "full-write 1 0xAAAAAAA", "writing", "reading"]
+        invalid_cmds = ["cmd1", "readwrite", "full_read", "full-write 1 0xAAAAAAA", "writing",
+                        "reading"]
         for cmd in invalid_cmds:
             with self.subTest(cmd=cmd):
                 self.assertFalse(self.validator.is_valid_command(cmd))
@@ -55,7 +57,8 @@ class TestSSDTestShell(TestCase):
                 self.assertFalse(self.validator.is_valid_command(cmd))
 
     def test_check_valid_value(self):
-        valid_values = ["write 3 0xAAAAAAAA", "write 3 0xA0AA1AAA", "fullwrite 0xAABBAAAA"]
+        valid_values = ["write 3 0xAAAAAAAA", "write 3 0xA0AA1AAA", "fullwrite 0xAABBAAAA",
+                        "fullwrite 0x00000000"]
         for cmd in valid_values:
             with self.subTest(cmd=cmd):
                 self.assertTrue(self.validator.is_valid_command(cmd))
@@ -83,8 +86,6 @@ class TestSSDTestShell(TestCase):
         self.mk_basic.help.return_value = 'ret'
         self.sut.run('HELP')
 
-        sys.stdout = sys.__stdout__
-
         self.assertEqual(captured_output.getvalue().strip(), "ret")
 
     def test_run_read(self):
@@ -97,8 +98,6 @@ class TestSSDTestShell(TestCase):
         sys.stdout = captured_output
         self.mk_basic.read.return_value = 'ret'
         self.sut.run('READ ADDR')
-
-        sys.stdout = sys.__stdout__
 
         self.assertEqual(captured_output.getvalue().strip(), "ret")
 
@@ -116,8 +115,6 @@ class TestSSDTestShell(TestCase):
         sys.stdout = captured_output
         self.mk_basic.full_read.return_value = 'ret'
         self.sut.run('FULLREAD')
-
-        sys.stdout = sys.__stdout__
 
         self.assertEqual(captured_output.getvalue().strip(), "ret")
 
