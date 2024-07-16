@@ -1,13 +1,14 @@
-import os
+import os, sys
 from typing import List
 
+sys.path.append(os.path.abspath(__file__).split('hardware')[0])
 from hardware.ssd_interface import ISSD
 from hardware.ssd_reader import SSDReader
 from hardware.ssd_reader_interface import ISSDReader
 from hardware.ssd_writer import SSDWriter
 from hardware.ssd_writer_interface import ISSDWriter
 
-CURRENT_FILE_PATH = os.path.abspath(__file__)
+CURRENT_FILE_PATH = os.path.dirname(os.path.abspath(__file__))
 DATA_FILE_DIR = os.path.join(CURRENT_FILE_PATH, 'nand.txt')
 RESULT_FILE_DIR = os.path.join(CURRENT_FILE_PATH, 'result.txt')
 
@@ -16,7 +17,6 @@ DATA_LENGTH = 10
 
 CMD_READ_LENGTH = 3
 CMD_WRITE_LENGTH = 4
-VALID_PREFIX = 'ssd'
 CMD_READ_TYPE = 'R'
 CMD_WRITE_TYPE = 'W'
 
@@ -78,11 +78,9 @@ class SSD(ISSD):
         # syntax check
         if len(argv) < CMD_READ_LENGTH:
             return False
-        prefix = argv[0]
         cmd_type = argv[1]
         lba = argv[2]
-        if prefix != VALID_PREFIX:
-            return False
+
         if not lba.isdigit():
             return False
 
@@ -120,8 +118,15 @@ class SSD(ISSD):
         return True
 
 
-if __name__ == '__main__':
+def main():
     import sys
 
-    ssd = SSD()
-    ssd.run(sys.argv)
+    try:
+        ssd = SSD()
+        ssd.run(sys.argv)
+    except Exception as e:
+        print(e)
+
+
+if __name__ == '__main__':
+    main()
