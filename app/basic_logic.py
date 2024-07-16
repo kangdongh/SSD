@@ -10,7 +10,8 @@ class BasicLogic:
         self._system_call_handler = system_call_handler
 
     def read(self, lba: str) -> str:
-        pass
+        self._system_call_handler.run(['R', lba])
+        return self._system_call_handler.get_result()
 
     def write(self, lba: str, value: str) -> None:
         self._system_call_handler.run(['W', lba, value])
