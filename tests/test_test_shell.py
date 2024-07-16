@@ -16,52 +16,55 @@ class TestTestShell(TestCase):
         self.sut.set_apps(self.mk_test_app_1, self.mk_test_app_2)
 
     def test_check_valid_cmd_length(self):
-        self.assertEqual(True, self.sut.is_valid_command("help"))
-        self.assertEqual(True, self.sut.is_valid_command("HELP"))
+        valid_cmds = ["help", "HELP"]
+        for cmd in valid_cmds:
+            with self.subTest(cmd=cmd):
+                self.assertEqual(True, self.sut.is_valid_command(cmd))
 
     def test_check_invalid_cmd_length(self):
-        self.assertEqual(False, self.sut.is_valid_command("read"))
-        self.assertEqual(False, self.sut.is_valid_command("write"))
-        self.assertEqual(False, self.sut.is_valid_command("fullwrite"))
-        self.assertEqual(False, self.sut.is_valid_command("fullread 3"))
-        self.assertEqual(False, self.sut.is_valid_command("write 3 4 6"))
-        self.assertEqual(False, self.sut.is_valid_command("help oh"))
+        invalid_cmds = ["read", "write", "fullwrite", "fullread 3", "write 3 4 6", "help oh"]
+        for cmd in invalid_cmds:
+            with self.subTest(cmd=cmd):
+                self.assertEqual(False, self.sut.is_valid_command(cmd))
 
     def test_check_valid_cmd(self):
-        self.assertEqual(True, self.sut.is_valid_command("read 1"))
-        self.assertEqual(True, self.sut.is_valid_command("write 1 0xAAAAAAAA"))
-        self.assertEqual(True, self.sut.is_valid_command("exit"))
-        self.assertEqual(True, self.sut.is_valid_command("Help"))
-        self.assertEqual(True, self.sut.is_valid_command("FullRead"))
-        self.assertEqual(True, self.sut.is_valid_command("FullWrite 0xAAAAAAAA"))
+        valid_cmds = ["read 1", "write 1 0xAAAAAAAA", "exit", "Help", "FullRead", "FullWrite 0xAAAAAAAA"]
+        for cmd in valid_cmds:
+            with self.subTest(cmd=cmd):
+                self.assertEqual(True, self.sut.is_valid_command(cmd))
 
     def test_check_invalid_cmd(self):
-        self.assertEqual(False, self.sut.is_valid_command("cmd1"))
-        self.assertEqual(False, self.sut.is_valid_command("readwrite"))
-        self.assertEqual(False, self.sut.is_valid_command("full_read"))
-        self.assertEqual(False, self.sut.is_valid_command("full-write 1 0xAAAAAAA"))
-        self.assertEqual(False, self.sut.is_valid_command("writing"))
-        self.assertEqual(False, self.sut.is_valid_command("reading"))
+        invalid_cmds = ["cmd1", "readwrite", "full_read", "full-write 1 0xAAAAAAA", "writing", "reading"]
+        for cmd in invalid_cmds:
+            with self.subTest(cmd=cmd):
+                self.assertEqual(False, self.sut.is_valid_command(cmd))
 
     def test_check_valid_address(self):
-        self.assertEqual(True, self.sut.is_valid_command("read 0"))
+        valid_addresses = ["read 0"]
+        for cmd in valid_addresses:
+            with self.subTest(cmd=cmd):
+                self.assertEqual(True, self.sut.is_valid_command(cmd))
 
     def test_check_invalid_address(self):
-        self.assertEqual(False, self.sut.is_valid_command("read 101"))
-        self.assertEqual(False, self.sut.is_valid_command("read -2"))
+        invalid_addresses = ["read 101", "read -2"]
+        for cmd in invalid_addresses:
+            with self.subTest(cmd=cmd):
+                self.assertEqual(False, self.sut.is_valid_command(cmd))
 
     def test_check_valid_value(self):
-        self.assertEqual(True, self.sut.is_valid_command("write 3 0xAAAAAAAA"))
-        self.assertEqual(True, self.sut.is_valid_command("write 3 0xA0AA1AAA"))
-        self.assertEqual(True, self.sut.is_valid_command("fullwrite 0xAABBAAAA"))
+        valid_values = ["write 3 0xAAAAAAAA", "write 3 0xA0AA1AAA", "fullwrite 0xAABBAAAA"]
+        for cmd in valid_values:
+            with self.subTest(cmd=cmd):
+                self.assertEqual(True, self.sut.is_valid_command(cmd))
 
     def test_check_invalid_value(self):
-        self.assertEqual(False, self.sut.is_valid_command("write 3 0xAAAAAAAZ"))
-        self.assertEqual(False, self.sut.is_valid_command("fullwrite 3 0xNAAAAAAZ"))
-        self.assertEqual(False, self.sut.is_valid_command("write 3 0xAA"))
-        self.assertEqual(False, self.sut.is_valid_command("write 3 0xAA__"))
-        self.assertEqual(False, self.sut.is_valid_command("write 3 0xAA1"))
-        self.assertEqual(False, self.sut.is_valid_command("write 3 0xAA123243421"))
+        invalid_values = [
+            "write 3 0xAAAAAAAZ", "fullwrite 3 0xNAAAAAAZ", "write 3 0xAA",
+            "write 3 0xAA__", "write 3 0xAA1", "write 3 0xAA123243421"
+        ]
+        for cmd in invalid_values:
+            with self.subTest(cmd=cmd):
+                self.assertEqual(False, self.sut.is_valid_command(cmd))
 
     def test_run_exit(self):
         self.assertEqual(-1, self.sut.run('EXIT'))
