@@ -1,11 +1,10 @@
 import os
 from hardware.ssd_reader_interface import ISSDReader
 
-READ_RESULT_FILE = './result_test.txt'
+READ_RESULT_FILE = './result.txt'
+
 
 class SSDReader(ISSDReader):
-    def tearDown(self):
-        os.remove(READ_RESULT_FILE)
 
     def read(
             self,
@@ -13,7 +12,7 @@ class SSDReader(ISSDReader):
             logical_bytes_address: int
     ) -> str:
         line_content = self.read_from_line(read_file_name, logical_bytes_address)
-        self.write_read_resut(READ_RESULT_FILE, line_content)
+        self.write_read_result(READ_RESULT_FILE, line_content)
         return line_content
 
     def read_from_line(self, read_file_name, logical_bytes_address):
@@ -31,7 +30,7 @@ class SSDReader(ISSDReader):
                 file_handler.close()
                 return line_content
 
-    def write_read_resut(self, write_file_name, read_result):
+    def write_read_result(self, write_file_name, read_result):
         file_handler = open(write_file_name, 'w')
         file_handler.write(read_result)
         file_handler.close()
