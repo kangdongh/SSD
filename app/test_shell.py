@@ -16,10 +16,13 @@ class TestShell:
         self._logic = basic_logic
         self._test_app1 = None
         self._test_app2 = None
+        self._cmd = None
+        self._params = None
 
     def set_apps(self, test_app_1, test_app_2):
         self._test_app1 = test_app_1
         self._test_app2 = test_app_2
+
     def _get_integer(self, value):
         try:
             return int(value)
@@ -74,29 +77,37 @@ class TestShell:
         cmd = cmd.upper()
         cmd_split = cmd.split(" ")
 
-        return self._is_valid_cmd_length(cmd_split) and \
-            self._is_valid_cmd(cmd_split[0]) and \
-            self._is_valid_address(cmd_split) and \
-            self._is_valid_value(cmd_split)
+        if self._is_valid_cmd_length(cmd_split) and \
+                self._is_valid_cmd(cmd_split[0]) and \
+                self._is_valid_address(cmd_split) and \
+                self._is_valid_value(cmd_split):
+            self._set_command(cmd_split)
+            return True
+        else:
+            return False
 
-    def run(self, cmd, params=None) -> int:
+    def _set_command(self, cmd_split):
+        self._cmd = cmd_split[0]
+        self._params = cmd_split[1:] if len(cmd_split) > 1 else None
+
+    def run(self) -> int:
         # Call _app.methods
         # return -1 for exit condition
-        if cmd == 'EXIT':
+        if self._cmd == 'EXIT':
             return -1
-        if cmd == 'HELP':
+        if self._cmd == 'HELP':
             ret = self._logic.help()
-        if cmd == 'WRITE':
-            self._logic.write(params[0], params[1])
-        if cmd == 'READ':
-            self._logic.read(params[0])
-        if cmd == 'FULLREAD':
+        if self._cmd == 'WRITE':
+            self._logic.write(self._params[0], self._params[1])
+        if self._cmd == 'READ':
+            self._logic.read(self._params[0])
+        if self._cmd == 'FULLREAD':
             self._logic.full_read()
-        if cmd == 'FULLWRITE':
-            self._logic.full_write(params[0])
-        if cmd == 'TESTAPP1':
+        if self._cmd == 'FULLWRITE':
+            self._logic.full_write(self._params[0])
+        if self._cmd == 'TESTAPP1':
             self._test_app1.run(self._logic)
-        if cmd == 'TESTAPP2':
+        if self._cmd == 'TESTAPP2':
             self._test_app2.run(self._logic)
         return 0
 
@@ -118,7 +129,7 @@ if __name__ == '__main__':
                 print("INVALID COMMAND")
                 continue
 
-            if app.run(inp) == -1:
+            if app.run() == -1:
                 break
         except Exception as e:
             print(str(e))
