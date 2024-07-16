@@ -66,13 +66,14 @@ class TestShell:
             return True
         if len(bytes) != 10:
             return False
-        if bytes[:2] != '0X':
+        if bytes[:2] != '0x':
             return False
         return self._get_hex(bytes[2:]) > 0
 
     def is_valid_command(self, cmd):
-        cmd = cmd.upper()
         cmd_split = cmd.split(" ")
+        cmd_split[0] = cmd_split[0].upper()
+
 
         return self._is_valid_cmd_length(cmd_split) and \
             self._is_valid_cmd(cmd_split[0]) and \
@@ -80,7 +81,7 @@ class TestShell:
             self._is_valid_value(cmd_split)
 
     def _set_command(self, cmd_split):
-        self._cmd = cmd_split[0]
+        self._cmd = cmd_split[0].upper()
         self._params = cmd_split[1:] if len(cmd_split) > 1 else None
 
     def run(self, cmd) -> int:
@@ -113,7 +114,6 @@ def start_progress():
     while True:
         try:
             inp = input()
-            inp = inp.upper()
 
             if not app.is_valid_command(inp):
                 print(INVALID_CMD)
