@@ -1,6 +1,16 @@
+import textwrap
 from typing import List
 
 from app.system_call_handler import SystemCallHandler
+
+HELP_DESC = textwrap.dedent("""
+- write: Write value to SSD / usage: write <LBA> <VALUE>
+- read: Read value from SSD / usage: read <LBA>
+- exit: Exit program / usage exit
+- help: Help command
+- fullwrite: Write value at all LBAs / usage: fullwrite <VALUE>
+- fullread: Read all LBAs / usage: fullread
+""").lstrip()
 
 
 class BasicLogic:
@@ -27,11 +37,7 @@ class BasicLogic:
             self.write(str(lba), value)
 
     def help(self) -> str:
-        help_str = ""
-        with open('./help_description.txt', 'r') as file:
-            help_str = file.read()
-
-        return help_str
+        return HELP_DESC
 
     def _system_call(self, system_call_arguments: List[str]):
         self._system_call_handler.run(system_call_arguments)
