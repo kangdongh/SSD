@@ -10,11 +10,11 @@ class BasicLogic:
         self._system_call_handler = system_call_handler
 
     def read(self, lba: str) -> str:
-        self._system_call_handler.run(['R', lba])
-        return self._system_call_handler.get_result()
+        self._system_call(['R', lba])
+        return self._read_result()
 
     def write(self, lba: str, value: str) -> None:
-        self._system_call_handler.run(['W', lba, value])
+        self._system_call(['W', lba, value])
 
     def full_read(self) -> str:
         full_read_strs = []
