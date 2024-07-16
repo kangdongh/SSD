@@ -1,4 +1,5 @@
 from app.basic_logic import BasicLogic
+from app.system_call_handler import SystemCallHandler
 from app.test_app.test_app_1 import TestApp1
 from app.test_app.test_app_2 import TestApp2
 
@@ -119,8 +120,10 @@ def main():
 
     current_file_abspath = os.path.abspath(__file__)
     ssd_path = os.path.join(current_file_abspath, '../hardware/ssd.py')
+    result_file_path = os.path.join(current_file_abspath, '../hardware/result.txt')
+    system_call_handler = SystemCallHandler(ssd_path, result_file_path)
 
-    basic_logic = BasicLogic(ssd_path)
+    basic_logic = BasicLogic(system_call_handler)
     validator = CommandValidator()
     shell = SSDTestShell(basic_logic, validator)
 
