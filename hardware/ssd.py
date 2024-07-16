@@ -1,7 +1,6 @@
 import os, sys
 from typing import List
-
-sys.path.append(os.path.abspath(__file__).split('hardware')[0])
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from hardware.ssd_interface import ISSD
 from hardware.ssd_reader import SSDReader
 from hardware.ssd_reader_interface import ISSDReader
