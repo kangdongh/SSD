@@ -9,7 +9,7 @@ from app.test_app.test_app_2 import TestApp2
 from app.ssd_test_shell import SSDTestShell, CommandValidator
 
 
-class TestTestShell(TestCase):
+class TestSSDTestShell(TestCase):
     def setUp(self):
         self.mk_basic = MagicMock(BasicLogic("test"))
         self.mk_test_app_1 = MagicMock(TestApp1)
