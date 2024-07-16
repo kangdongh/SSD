@@ -40,6 +40,6 @@ class TestSSDWriter(TestCase):
         for current_line_number, line in enumerate(file_handler, start=0):
             if current_line_number == logical_bytes_address:
                 line_content = line.strip()
-                file_handler.close()
                 break
+        file_handler.close()
         return line_content
