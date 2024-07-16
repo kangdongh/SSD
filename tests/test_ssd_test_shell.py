@@ -6,7 +6,7 @@ from unittest.mock import MagicMock
 from app.basic_logic import BasicLogic
 from app.test_app.test_app_1 import TestApp1
 from app.test_app.test_app_2 import TestApp2
-from app.test_shell import TestShell, CommandValidator
+from app.ssd_test_shell import TestShell, CommandValidator
 
 
 class TestTestShell(TestCase):
