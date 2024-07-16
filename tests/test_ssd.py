@@ -8,7 +8,6 @@ from hardware.ssd_writer import SSDWriter
 TEST_DATA_FILE_PATH = './test_nand.txt'
 TEST_RESULT_FILE_PATH = './test_result.txt'
 INITIAL_DATA_VALUE = '0x00000000'
-SSD_PATH = os.path.join(os.path.abspath(__file__), '../../hardware/ssd.py')
 
 
 class TestSSD(TestCase):
