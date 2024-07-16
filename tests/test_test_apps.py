@@ -1,4 +1,4 @@
-from unittest import TestCase, skip
+from unittest import TestCase
 from unittest.mock import Mock
 
 from app.test_app.test_app_1 import TestApp1
