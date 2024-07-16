@@ -20,12 +20,24 @@ class TestSSD(TestCase):
         os.remove(TEST_RESULT_FILE_PATH)
 
     @skip
-    def test_initialize(self):
+    def test_initialize_if_file_not_exist_before(self):
         self.assertEqual(True, os.path.exists(TEST_DATA_FILE_PATH))
         self.assertEqual(True, os.path.exists(TEST_RESULT_FILE_PATH))
 
         with open(TEST_DATA_FILE_PATH, 'r') as data_file:
             for _ in range(100):
+                self.assertEqual(INITIAL_DATA_VALUE, data_file.readline())
+
+    @skip
+    def test_initialize_if_file_exist_before(self):
+        with open(TEST_DATA_FILE_PATH, 'w') as data_file:
+            data_file.write('0xAAAAAAAA\n0xBBBBBBBB\n0xCCCCCCCC')
+
+        with open(TEST_DATA_FILE_PATH, 'r') as data_file:
+            self.assertEqual('0xAAAAAAAA', data_file.readline())
+            self.assertEqual('0xBBBBBBBB', data_file.readline())
+            self.assertEqual('0xCCCCCCCC', data_file.readline())
+            for _ in range(97):
                 self.assertEqual(INITIAL_DATA_VALUE, data_file.readline())
 
     def assert_ssd_run_raises(self, args):
