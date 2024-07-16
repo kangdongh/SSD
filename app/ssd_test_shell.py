@@ -1,7 +1,20 @@
+import textwrap
+
 from app.basic_logic import BasicLogic
 from app.system_call_handler import SystemCallHandler
 from app.test_app.test_app_1 import TestApp1
 from app.test_app.test_app_2 import TestApp2
+from app.test_app.test_app_interface import ITestApp
+
+HELP_PREFIX = textwrap.dedent("""
+**********************************************************
+********************* COMMAND HELP ***********************
+**********************************************************
+""").strip()
+
+HELP_POSTFIX = textwrap.dedent("""
+*********************************************************
+""").strip()
 
 
 class CommandValidator:
@@ -65,6 +78,9 @@ class CommandValidator:
 
 class SSDTestShell:
     INVALID_CMD = "INVALID COMMAND"
+    _logic: BasicLogic
+    _test_app1: ITestApp
+    _test_app2: ITestApp
 
     def __init__(self, basic_logic: BasicLogic, validator: CommandValidator, test_app1=None, test_app2=None):
         self._logic = basic_logic
@@ -87,7 +103,11 @@ class SSDTestShell:
         if self._cmd == 'EXIT':
             return -1
         if self._cmd == 'HELP':
+            print(HELP_PREFIX)
             print(self._logic.help())
+            print(self._test_app1.help())
+            print(self._test_app2.help())
+            print(HELP_POSTFIX)
         elif self._cmd == 'WRITE':
             self._logic.write(self._params[0], self._params[1])
         elif self._cmd == 'READ':
