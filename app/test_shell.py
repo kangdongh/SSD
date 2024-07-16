@@ -90,13 +90,16 @@ class TestShell:
         if self._cmd == 'EXIT':
             return -1
         if self._cmd == 'HELP':
-            ret = self._logic.help()
+            result = self._logic.help()
+            print(result)
         if self._cmd == 'WRITE':
             self._logic.write(self._params[0], self._params[1])
         if self._cmd == 'READ':
-            self._logic.read(self._params[0])
+            result = self._logic.read(self._params[0])
+            print(result)
         if self._cmd == 'FULLREAD':
-            self._logic.full_read()
+            result = self._logic.full_read()
+            print(result)
         if self._cmd == 'FULLWRITE':
             self._logic.full_write(self._params[0])
         if self._cmd == 'TESTAPP1':
@@ -106,14 +109,7 @@ class TestShell:
         return 0
 
 
-if __name__ == '__main__':
-    import os.path
-
-    current_file_abspath = os.path.abspath(__file__)
-    ssd_path = os.path.join(current_file_abspath, '../hardware/ssd.py')
-
-    app = TestShell(BasicLogic(ssd_path))
-    app.set_apps(TestApp1(), TestApp2())
+def start_progress():
     while True:
         try:
             inp = input()
@@ -127,3 +123,14 @@ if __name__ == '__main__':
                 break
         except Exception as e:
             print(str(e))
+
+
+if __name__ == '__main__':
+    import os.path
+
+    current_file_abspath = os.path.abspath(__file__)
+    ssd_path = os.path.join(current_file_abspath, '../hardware/ssd.py')
+
+    app = TestShell(BasicLogic(ssd_path))
+    app.set_apps(TestApp1(), TestApp2())
+    start_progress()

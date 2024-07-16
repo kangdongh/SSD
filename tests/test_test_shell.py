@@ -6,6 +6,9 @@ from app.test_app.test_app_1 import TestApp1
 from app.test_app.test_app_2 import TestApp2
 from app.test_shell import TestShell
 
+import io
+import sys
+
 
 class TestTestShell(TestCase):
     def setUp(self):
@@ -74,11 +77,29 @@ class TestTestShell(TestCase):
         self.assertEqual(0, self.sut.run('HELP'))
         self.assertEqual(1, self.mk_basic.help.call_count)
 
+    def test_run_help_print(self):
+        captured_output = io.StringIO()
+        sys.stdout = captured_output
+        self.mk_basic.help.return_value = 'ret'
+        self.sut.run('HELP')
+
+        sys.stdout = sys.__stdout__
+
+        self.assertEqual(captured_output.getvalue().strip(), "ret")
     def test_run_read(self):
         self.mk_basic.read.return_value = 'return read value'
         self.sut.run('READ ADDR')
         self.assertEqual(1, self.mk_basic.read.call_count)
 
+    def test_run_read_print(self):
+        captured_output = io.StringIO()
+        sys.stdout = captured_output
+        self.mk_basic.read.return_value = 'ret'
+        self.sut.run('READ ADDR')
+
+        sys.stdout = sys.__stdout__
+
+        self.assertEqual(captured_output.getvalue().strip(), "ret")
     def test_run_write(self):
         self.sut.run('WRITE ADDR VALUE')
         self.assertEqual(1, self.mk_basic.write.call_count)
@@ -87,6 +108,16 @@ class TestTestShell(TestCase):
         self.mk_basic.full_read.return_value = 'full read'
         self.sut.run('FULLREAD')
         self.assertEqual(1, self.mk_basic.full_read.call_count)
+
+    def test_run_full_read_print(self):
+        captured_output = io.StringIO()
+        sys.stdout = captured_output
+        self.mk_basic.full_read.return_value = 'ret'
+        self.sut.run('FULLREAD')
+
+        sys.stdout = sys.__stdout__
+
+        self.assertEqual(captured_output.getvalue().strip(), "ret")
 
     def test_run_fullwrite(self):
         self.sut.run('FULLWRITE VALUE')
