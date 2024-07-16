@@ -21,7 +21,7 @@ class TestSSDReader(TestCase):
     def tearDown(self):
         os.remove(READ_FILE_DIR)
 
-    @skip
+
     def test_read(self):
         ssd_reader = SSDReader()
 
