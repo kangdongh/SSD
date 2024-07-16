@@ -10,7 +10,15 @@ from hardware.ssd_writer_interface import ISSDWriter
 CURRENT_FILE_PATH = os.path.abspath(__file__)
 DATA_FILE_DIR = os.path.join(CURRENT_FILE_PATH, 'nand.txt')
 RESULT_FILE_DIR = os.path.join(CURRENT_FILE_PATH, 'result.txt')
+
 INITIAL_DATA_VALUE = '0x00000000'
+DATA_LENGTH = 10
+
+CMD_READ_LENGTH = 3
+CMD_WRITE_LENGTH = 4
+VALID_PREFIX = 'ssd'
+CMD_READ_TYPE = 'R'
+CMD_WRITE_TYPE = 'W'
 
 
 class SSD(ISSD):
@@ -46,25 +54,46 @@ class SSD(ISSD):
             raise Exception('INVALID COMMAND')
 
     def is_valid_cmd(self, argv: List[str]):
+        if not self._check_cmd_syntax(argv):
+            return False
+        if not self._check_cmd_semantic(argv):
+            return False
+        return True
+
+    def _check_cmd_syntax(self, argv: List[str]):
         # syntax check
-        if len(argv) < 3:
+        if len(argv) < CMD_READ_LENGTH:
             return False
         prefix = argv[0]
         cmd_type = argv[1]
         lba = argv[2]
-        if prefix != 'ssd' or (cmd_type != 'R' and cmd_type != 'W') or not lba.isdigit():
+        if prefix != VALID_PREFIX:
             return False
-        if (cmd_type == 'R' and len(argv) != 3) or (cmd_type == 'W' and len(argv) != 4):
+        if not lba.isdigit():
             return False
-        # semantic check
+
+        if not (cmd_type == CMD_READ_TYPE or cmd_type == CMD_WRITE_TYPE):
+            return False
+        elif cmd_type == CMD_READ_TYPE and len(argv) != CMD_READ_LENGTH:
+            return False
+        elif cmd_type == CMD_WRITE_TYPE and len(argv) != CMD_WRITE_LENGTH:
+            return False
+
+        return True
+
+    def _check_cmd_semantic(self, argv: List[str]):
+        cmd_type = argv[1]
+        lba = argv[2]
         if int(lba) >= self._max_block_size:
             return False
-        if cmd_type == 'W' and not self._is_valid_data(argv[3]):
-            return False
+        if cmd_type == CMD_WRITE_TYPE:
+            data = argv[3]
+            if not self._is_valid_data(data):
+                return False
         return True
 
     def _is_valid_data(self, data):
-        if len(data) != 10:
+        if len(data) != DATA_LENGTH:
             return False
 
         if not data.startswith('0x'):
