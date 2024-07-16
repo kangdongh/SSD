@@ -17,4 +17,4 @@ class TestApp1(ITestApp):
                 raise RuntimeError(f"{self.__class__.__name__} Failure")
 
     def help(self):
-        return f"{self.__class__.__name__}: Full-Write / Read Test\n"
+        return f"- {self.__class__.__name__}: Full-Write, Read Test / usage: testapp1"
