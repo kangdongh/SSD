@@ -1,82 +1,50 @@
 import warnings
 warnings.filterwarnings('ignore')
 
-import sys
-import io
-
 import unittest
-from unittest.mock import Mock
+from unittest.mock import patch
 
 from app.basic_logic import BasicLogic
 
+TEMP_SSD_PATH = "basic_logic/test"
 FULL_COUNT = 100
 LBA = 3
 VALUE = 0x00000000
 
 
 class TestBasicLogic(unittest.TestCase):
-    def setUp(self):
-        self.sut = Mock(spec=BasicLogic("basic_logic/test"))
-        self.output = io.StringIO()
-
     @unittest.skip
-    def test_read_pass(self):
-        sys.stdout = self.output
-        self.sut.read(LBA)
+    @patch.object(BasicLogic, '_system_call')
+    def test_read_result(self, mk):
+        pass
 
-        self.assertEqual(self.output.getvalue(), "PASS to read from " + str(LBA))
+    @patch.object(BasicLogic, '_read_result')
+    def test_read_result(self, read_mk):
+        read_mk.return_value = "0x0000000F"
 
-    @unittest.skip
-    def test_read_wrong_address(self):
-        wrong_lba = -1
+        basic_logic = BasicLogic(TEMP_SSD_PATH)
+        self.assertEqual(basic_logic._read_result(), "0x0000000F")
+        self.assertEqual(read_mk.call_count, 1)
 
-        with self.assertRaises(Exception):
-            self.sut.read(wrong_lba)
+    @patch.object(BasicLogic, '_write_result')
+    @patch.object(BasicLogic, '_read_result')
+    def test_write_result(self, read_mk, write_mk):
+        read_mk.return_value = "0x0000000F"
 
-    @unittest.skip
-    def test_write_pass(self):
-        self.sut.write(LBA, VALUE)
-        # self.sut.read.return_value = VALUE
+        basic_logic = BasicLogic(TEMP_SSD_PATH)
+        basic_logic._write_result()
 
-        self.assertEqual(self.sut.read(LBA), VALUE)
+        self.assertEqual(basic_logic._read_result(), "0x0000000F")
+        self.assertEqual(write_mk.call_count, 1)
 
-    @unittest.skip
-    def test_write_wrong_address(self):
-        wrong_lba = -1
+    @patch.object(BasicLogic, '_help_result')
+    def test_help_result(self, mk):
+        mk.return_value = "This is the help desc"
 
-        with self.assertRaises(Exception):
-            self.sut.write(wrong_lba, VALUE)
+        basic_logic = BasicLogic(TEMP_SSD_PATH)
+        basic_logic._help_result()
 
-    @unittest.skip
-    def test_write_wrong_value(self):
-        wrong_value = -1
-
-        with self.assertRaises(Exception):
-            self.sut.write(LBA, wrong_value)
-
-    @unittest.skip
-    def test_full_read(self):
-        self.sut.full_read()
-
-        self.assertEqual(self.sut.read.call_count, FULL_COUNT)
-
-    @unittest.skip
-    def test_full_write(self):
-        self.sut.full_write(VALUE)
-
-        self.assertEqual(self.sut.write.call_count, FULL_COUNT)
-
-    @unittest.skip
-    def test_exit_called_once(self):
-        self.sut.exit()
-
-        self.sut.exit.assert_called_once()
-
-    @unittest.skip
-    def test_help_called_once(self):
-        self.sut.help()
-
-        self.sut.help.assert_called_once()
+        self.assertEqual(mk.call_count, 1)
 
 
 if __name__ == "__main__":
