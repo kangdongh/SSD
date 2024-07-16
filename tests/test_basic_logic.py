@@ -1,21 +1,16 @@
-import warnings
-from unittest import skip
-
-NUM_LBA = 100
-warnings.filterwarnings('ignore')
-
-import unittest
-from unittest.mock import patch, Mock
+from unittest import skip, TestCase
+from unittest.mock import Mock
 
 from app.basic_logic import BasicLogic
 
+NUM_LBA = 100
 TEMP_SSD_PATH = "basic_logic/test"
 FULL_COUNT = 100
 LBA = '3'
 VALUE = '0x00000001'
 
 
-class TestBasicLogic(unittest.TestCase):
+class TestBasicLogic(TestCase):
     def setUp(self):
         self.system_call_handler = Mock()
         self.system_call_handler.get_result.return_value = VALUE
@@ -50,7 +45,3 @@ class TestBasicLogic(unittest.TestCase):
         self.sut.full_write(VALUE)
 
         self.assertEqual(self.system_call_handler.run.call_count, NUM_LBA)
-
-
-if __name__ == "__main__":
-    unittest.main()
