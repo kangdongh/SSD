@@ -1,5 +1,5 @@
 import os
-from unittest import TestCase, skip
+from unittest import TestCase
 from hardware.ssd_writer import SSDWriter
 
 WRITE_FILE_NAME = './nand_test.txt'
@@ -26,7 +26,6 @@ class TestSSDWriter(TestCase):
         self.ssd_writer.write(WRITE_FILE_NAME, logical_bytes_address, data_to_write)
         self.assertEqual(data_to_write, self.read_from_line(WRITE_FILE_NAME, logical_bytes_address))
 
-    @skip
     def test_success_write_to_line02(self):
         logical_bytes_address = 99
         data_to_write = '0x9988FFFB'
@@ -41,5 +40,6 @@ class TestSSDWriter(TestCase):
         for current_line_number, line in enumerate(file_handler, start=0):
             if current_line_number == logical_bytes_address:
                 line_content = line.strip()
-                file_handler.close()
-                return line_content
+                break
+        file_handler.close()
+        return line_content
