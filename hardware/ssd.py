@@ -1,5 +1,6 @@
 import os, sys
 from typing import List
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from hardware.ssd_interface import ISSD
 from hardware.ssd_reader import SSDReader
@@ -11,18 +12,17 @@ CURRENT_FILE_PATH = os.path.dirname(os.path.abspath(__file__))
 DATA_FILE_DIR = os.path.join(CURRENT_FILE_PATH, 'nand.txt')
 RESULT_FILE_DIR = os.path.join(CURRENT_FILE_PATH, 'result.txt')
 
-INITIAL_DATA_VALUE = '0x00000000'
-DATA_LENGTH = 10
-
-CMD_READ_LENGTH = 3
-CMD_WRITE_LENGTH = 4
-CMD_READ_TYPE = 'R'
-CMD_WRITE_TYPE = 'W'
-
 
 class SSD(ISSD):
     _reader: ISSDReader
     _writer: ISSDWriter
+
+    CMD_READ_LENGTH = 3
+    CMD_WRITE_LENGTH = 4
+    CMD_READ_TYPE = 'R'
+    CMD_WRITE_TYPE = 'W'
+    INITIAL_DATA_VALUE = '0x00000000'
+    DATA_LENGTH = 10
 
     def __init__(
             self,
@@ -42,7 +42,7 @@ class SSD(ISSD):
         if not os.path.exists(self._data_file_dir):
             with open(self._data_file_dir, 'w') as data_file:
                 for _ in range(self._max_block_size):
-                    data_file.write(f'{INITIAL_DATA_VALUE}\n')
+                    data_file.write(f'{SSD.INITIAL_DATA_VALUE}\n')
 
         if not os.path.exists(self._result_file_dir):
             with open(self._result_file_dir, 'w') as result_file:
@@ -53,9 +53,9 @@ class SSD(ISSD):
             raise Exception('INVALID COMMAND')
         cmd_type = argv[1]
         lba = int(argv[2])
-        if cmd_type == CMD_READ_TYPE:
+        if cmd_type == SSD.CMD_READ_TYPE:
             self.read(lba)
-        elif cmd_type == CMD_WRITE_TYPE:
+        elif cmd_type == SSD.CMD_WRITE_TYPE:
             data = argv[3]
             self.write(lba, data)
 
@@ -75,7 +75,7 @@ class SSD(ISSD):
 
     def _check_cmd_syntax(self, argv: List[str]):
         # syntax check
-        if len(argv) < CMD_READ_LENGTH:
+        if len(argv) < SSD.CMD_READ_LENGTH:
             return False
         cmd_type = argv[1]
         lba = argv[2]
@@ -83,11 +83,11 @@ class SSD(ISSD):
         if not lba.isdigit():
             return False
 
-        if not (cmd_type == CMD_READ_TYPE or cmd_type == CMD_WRITE_TYPE):
+        if not (cmd_type == SSD.CMD_READ_TYPE or cmd_type == SSD.CMD_WRITE_TYPE):
             return False
-        elif cmd_type == CMD_READ_TYPE and len(argv) != CMD_READ_LENGTH:
+        elif cmd_type == SSD.CMD_READ_TYPE and len(argv) != SSD.CMD_READ_LENGTH:
             return False
-        elif cmd_type == CMD_WRITE_TYPE and len(argv) != CMD_WRITE_LENGTH:
+        elif cmd_type == SSD.CMD_WRITE_TYPE and len(argv) != SSD.CMD_WRITE_LENGTH:
             return False
 
         return True
@@ -97,14 +97,14 @@ class SSD(ISSD):
         lba = argv[2]
         if int(lba) >= self._max_block_size:
             return False
-        if cmd_type == CMD_WRITE_TYPE:
+        if cmd_type == SSD.CMD_WRITE_TYPE:
             data = argv[3]
             if not self._is_valid_data(data):
                 return False
         return True
 
     def _is_valid_data(self, data):
-        if len(data) != DATA_LENGTH:
+        if len(data) != SSD.DATA_LENGTH:
             return False
 
         if not data.startswith('0x'):
