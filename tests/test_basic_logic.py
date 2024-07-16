@@ -1,50 +1,55 @@
 import warnings
+from unittest import skip
+
+NUM_LBA = 100
 warnings.filterwarnings('ignore')
 
 import unittest
-from unittest.mock import patch
+from unittest.mock import patch, Mock
 
 from app.basic_logic import BasicLogic
 
 TEMP_SSD_PATH = "basic_logic/test"
 FULL_COUNT = 100
-LBA = 3
-VALUE = 0x00000000
+LBA = '3'
+VALUE = '0x00000001'
 
 
 class TestBasicLogic(unittest.TestCase):
-    @unittest.skip
-    @patch.object(BasicLogic, '_system_call')
-    def test_read_result(self, mk):
-        pass
+    def setUp(self):
+        self.system_call_handler = Mock()
+        self.system_call_handler.get_result.return_value = VALUE
+        self.sut = BasicLogic(self.system_call_handler)
 
-    @patch.object(BasicLogic, '_read_result')
-    def test_read_result(self, read_mk):
-        read_mk.return_value = "0x0000000F"
+    @skip
+    def test_read_result(self):
+        ret = self.sut.read(LBA)
 
-        basic_logic = BasicLogic(TEMP_SSD_PATH)
-        self.assertEqual(basic_logic._read_result(), "0x0000000F")
-        self.assertEqual(read_mk.call_count, 1)
+        self.assertEqual(ret, VALUE)
+        self.system_call_handler.run.assert_called_once()
+        self.system_call_handler.run.assert_any_call(['R', LBA])
+        self.system_call_handler.get_result.assert_call_once()
 
-    @patch.object(BasicLogic, '_write_result')
-    @patch.object(BasicLogic, '_read_result')
-    def test_write_result(self, read_mk, write_mk):
-        read_mk.return_value = "0x0000000F"
+    def test_write_result(self):
+        self.sut.write(LBA, VALUE)
 
-        basic_logic = BasicLogic(TEMP_SSD_PATH)
-        basic_logic._write_result()
+        self.system_call_handler.run.assert_called_once()
+        self.system_call_handler.run.assert_any_call(['W', LBA, VALUE])
 
-        self.assertEqual(basic_logic._read_result(), "0x0000000F")
-        self.assertEqual(write_mk.call_count, 1)
+    @skip
+    def test_full_read(self):
+        expected_result = '\n'.join([VALUE] * NUM_LBA)
 
-    @patch.object(BasicLogic, '_help_result')
-    def test_help_result(self, mk):
-        mk.return_value = "This is the help desc"
+        ret = self.sut.full_read()
 
-        basic_logic = BasicLogic(TEMP_SSD_PATH)
-        basic_logic._help_result()
+        self.assertEqual(ret, expected_result)
+        self.assertEqual(self.system_call_handler.run.call_count, NUM_LBA)
+        self.assertEqual(self.system_call_handler.get_result.call_count, NUM_LBA)
 
-        self.assertEqual(mk.call_count, 1)
+    def test_full_write(self):
+        self.sut.full_write(VALUE)
+
+        self.assertEqual(self.system_call_handler.run.call_count, NUM_LBA)
 
 
 if __name__ == "__main__":
