@@ -42,7 +42,40 @@ class SSD(ISSD):
                 result_file.write('\n')
 
     def run(self, argv: List[str]):
-        pass
+        if not self.is_valid_cmd(argv):
+            raise Exception('INVALID COMMAND')
+
+    def is_valid_cmd(self, argv: List[str]):
+        # syntax check
+        if len(argv) < 3:
+            return False
+        prefix = argv[0]
+        cmd_type = argv[1]
+        lba = argv[2]
+        if prefix != 'ssd' or (cmd_type != 'R' and cmd_type != 'W') or not lba.isdigit():
+            return False
+        if (cmd_type == 'R' and len(argv) != 3) or (cmd_type == 'W' and len(argv) != 4):
+            return False
+        # semantic check
+        if int(lba) >= self._max_block_size:
+            return False
+        if cmd_type == 'W' and not self._is_valid_data(argv[3]):
+            return False
+        return True
+
+    def _is_valid_data(self, data):
+        if len(data) != 10:
+            return False
+
+        if not data.startswith('0x'):
+            return False
+
+        hex_digits = set('0123456789abcdefABCDEF')
+        for char in data[2:]:
+            if char not in hex_digits:
+                return False
+        return True
+
 
 if __name__ == '__main__':
     import sys
