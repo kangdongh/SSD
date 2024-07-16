@@ -12,11 +12,14 @@ class TestShell:
     _test_app1: ITestApp
     _test_app2: ITestApp
 
-    def __init__(self, path):
-        self._logic = BasicLogic(path)
-        self._test_app1 = TestApp1()
-        self._test_app2 = TestApp2()
+    def __init__(self, basic_logic):
+        self._logic = basic_logic
+        self._test_app1 = None
+        self._test_app2 = None
 
+    def set_apps(self, test_app_1, test_app_2):
+        self._test_app1 = test_app_1
+        self._test_app2 = test_app_2
     def _get_integer(self, value):
         try:
             return int(value)
@@ -76,10 +79,26 @@ class TestShell:
             self._is_valid_address(cmd_split) and \
             self._is_valid_value(cmd_split)
 
-    def run(self, line) -> bool:
+    def run(self, cmd, params=None) -> int:
         # Call _app.methods
-        # return True for exit condition
-        return True
+        # return -1 for exit condition
+        if cmd == 'EXIT':
+            return -1
+        if cmd == 'HELP':
+            ret = self._logic.help()
+        if cmd == 'WRITE':
+            self._logic.write(params[0], params[1])
+        if cmd == 'READ':
+            self._logic.read(params[0])
+        if cmd == 'FULLREAD':
+            self._logic.full_read()
+        if cmd == 'FULLWRITE':
+            self._logic.full_write(params[0])
+        if cmd == 'TESTAPP1':
+            self._test_app1.run(self._logic)
+        if cmd == 'TESTAPP2':
+            self._test_app2.run(self._logic)
+        return 0
 
 
 if __name__ == '__main__':
@@ -88,8 +107,8 @@ if __name__ == '__main__':
     current_file_abspath = os.path.abspath(__file__)
     ssd_path = os.path.join(current_file_abspath, '../hardware/ssd.py')
 
-    app = TestShell(ssd_path)
-
+    app = TestShell(BasicLogic(ssd_path))
+    app.set_apps(TestApp1(), TestApp2())
     while True:
         try:
             inp = input()
@@ -99,8 +118,7 @@ if __name__ == '__main__':
                 print("INVALID COMMAND")
                 continue
 
-            exit_condition = app.run(inp)
-            if exit_condition:
+            if app.run(inp) == -1:
                 break
         except Exception as e:
             print(str(e))
