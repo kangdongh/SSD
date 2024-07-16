@@ -1,5 +1,5 @@
-import os
 from hardware.ssd_reader_interface import ISSDReader
+
 
 class SSDReader(ISSDReader):
 
@@ -14,14 +14,13 @@ class SSDReader(ISSDReader):
 
         try:
             with open(read_file_name, 'r', encoding='utf-8') as file_handler:
-                line_content = None
-                for current_line_number, line in enumerate(file_handler, start=0):
-                    if current_line_number == logical_bytes_address:
-                        line_content = line.strip()
-                        break;
-
-                file_handler.close()
-                return line_content
+                lines = file_handler.readlines()
+                if logical_bytes_address < len(lines):
+                    line_content = lines[logical_bytes_address].strip()
+                    return line_content
+                else:
+                    print(f'주소 {logical_bytes_address}가 설정된 용량을 초과 합니다.')
+                    return None
 
         except FileExistsError:
             print(f'{read_file_name} 파일이 존재하지 않습니다.')
