@@ -71,13 +71,11 @@ class TestSSD(TestCase):
         with open(TEST_RESULT_FILE_PATH, 'r') as result_file:
             self.assertEqual('0x00000002', result_file.readline().strip())
 
-    @skip
-    @patch.object(SSDWriter, 'write')
-    def test_run_write(self, write_fn):
-        target_address = 2
+    def test_run_write(self):
+        target_address = 6
         self.ssd.run(['ssd', 'W', str(target_address), '0x00000002'])
 
         with open(TEST_DATA_FILE_PATH, 'r') as data_file:
-            for _ in range(target_address):
+            for i in range(target_address):
                 data_file.readline()
-            self.assertEqual('0x00000002', data_file.readline())
+            self.assertEqual('0x00000002', data_file.readline().strip())

@@ -56,10 +56,16 @@ class SSD(ISSD):
         lba = int(argv[2])
         if cmd_type == CMD_READ_TYPE:
             self.read(lba)
+        elif cmd_type == CMD_WRITE_TYPE:
+            data = argv[3]
+            self.write(lba, data)
 
     def read(self, address):
         read_value = self._ssd_reader.read(self._data_file_dir, address)
         self._ssd_writer.write(self._result_file_dir, 0, read_value, 1)
+
+    def write(self, address, data):
+        return self._ssd_writer.write(self._data_file_dir, address, data)
 
     def is_valid_cmd(self, argv: List[str]):
         if not self._check_cmd_syntax(argv):
