@@ -30,7 +30,7 @@ class CommandValidator:
     def _is_valid_cmd_length(self, cmds):
         if len(cmds) == 0:
             return False
-        if cmds[0] in ['EXIT', 'HELP', 'FULLREAD', 'TESTAPP1', 'TESTAPP2'] and len(cmds) != 1:
+        if cmds[0] in ['EXIT', 'HELP', 'FULLREAD'] + TESTAPP_LIST and len(cmds) != 1:
             return False
         if cmds[0] in ['READ', 'FULLWRITE'] and len(cmds) != 2:
             return False
@@ -65,7 +65,7 @@ class CommandValidator:
 class TestShell:
     INVALID_CMD = "INVALID COMMAND"
 
-    def __init__(self, basic_logic, validator, test_app1=None, test_app2=None):
+    def __init__(self, basic_logic: BasicLogic, validator: CommandValidator, test_app1=None, test_app2=None):
         self._logic = basic_logic
         self._validator = validator
         self._test_app1 = test_app1
