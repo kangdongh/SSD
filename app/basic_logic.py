@@ -10,7 +10,7 @@ HELP_DESC = textwrap.dedent("""
 - help: Help command
 - fullwrite: Write value at all LBAs / usage: fullwrite <VALUE>
 - fullread: Read all LBAs / usage: fullread
-""").lstrip()
+""").strip()
 
 
 class BasicLogic:
