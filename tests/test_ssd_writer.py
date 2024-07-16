@@ -2,8 +2,10 @@ import os
 from unittest import TestCase, skip
 from hardware.ssd_writer import SSDWriter
 
-WRITE_FILE_NAME = './nand.txt'
+WRITE_FILE_NAME = './nand_test.txt'
 INIT_VALUE = '0x00000000\n'
+
+
 class TestSSDWriter(TestCase):
 
     def setUp(self):
@@ -17,6 +19,7 @@ class TestSSDWriter(TestCase):
 
     def tearDown(self):
         os.remove(WRITE_FILE_NAME)
+
     @skip
     def test_write01(self):
         logical_bytes_address = 1
