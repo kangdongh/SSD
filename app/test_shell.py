@@ -120,13 +120,13 @@ if __name__ == '__main__':
     while True:
         try:
             inp = input()
-            inp = inp.lower()
-            # validation
+            inp = inp.upper()
+
             if not app.is_valid_command(inp):
-                print("INVALID COMMAND")
+                print(INVALID_CMD)
                 continue
 
-            if app.run() == -1:
+            if app.run(inp) == -1:
                 break
         except Exception as e:
             print(str(e))
