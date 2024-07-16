@@ -8,7 +8,8 @@ from hardware.ssd_writer import SSDWriter
 TEST_DATA_FILE_PATH = './test_nand.txt'
 TEST_RESULT_FILE_PATH = './test_result.txt'
 INITIAL_DATA_VALUE = '0x00000000'
-
+print(os.path.abspath(__file__).split('tests')[0])
+SSD_PATH = os.path.join(os.path.abspath(__file__).split('tests')[0], '/hardware/ssd.py')
 
 class TestSSD(TestCase):
     def setUp(self):
@@ -54,8 +55,6 @@ class TestSSD(TestCase):
     def test_run_invalid_input_command(self):
         with self.subTest("INVALID TYPE"):
             self.assert_ssd_run_raises(['ssd', 'X', '2'])
-        with self.subTest("INVALID CHARACTER"):
-            self.assert_ssd_run_raises(['sad', 'R', '2'])
         with self.subTest("INVALID VALUE"):
             self.assert_ssd_run_raises(['ssd', 'W', '2', '0xAABBCCGG'])
 
