@@ -52,6 +52,14 @@ class SSD(ISSD):
     def run(self, argv: List[str]):
         if not self.is_valid_cmd(argv):
             raise Exception('INVALID COMMAND')
+        cmd_type = argv[1]
+        lba = int(argv[2])
+        if cmd_type == CMD_READ_TYPE:
+            self.read(lba)
+
+    def read(self, address):
+        read_value = self._ssd_reader.read(self._data_file_dir, address)
+        self._ssd_writer.write(self._result_file_dir, 0, read_value, 1)
 
     def is_valid_cmd(self, argv: List[str]):
         if not self._check_cmd_syntax(argv):
