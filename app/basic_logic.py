@@ -1,24 +1,29 @@
-import subprocess
 from typing import List
+
+from app.system_call_handler import SystemCallHandler
 
 
 class BasicLogic:
-    _ssd_path: str
+    _system_call_handler: SystemCallHandler
 
-    def __init__(self, ssd_path):
-        self._ssd_path = ssd_path
+    def __init__(self, system_call_handler: SystemCallHandler):
+        self._system_call_handler = system_call_handler
 
     def read(self, lba: str) -> str:
         pass
 
     def write(self, lba: str, value: str) -> None:
-        pass
+        self._system_call_handler.run(['W', lba, value])
 
     def full_read(self) -> str:
-        pass
+        full_read_strs = []
+        for lba in range(0, 100):
+            full_read_strs.append(self.read(str(lba)))
+        return '\n'.join(full_read_strs)
 
     def full_write(self, value: str) -> None:
-        pass
+        for lba in range(0, 100):
+            self.write(str(lba), value)
 
     def help(self) -> str:
         help_str = ""
@@ -27,19 +32,8 @@ class BasicLogic:
 
         return help_str
 
-    def _system_call(self, args: List[str]):
-        subprocess.run(['python', self._ssd_path] + args)
+    def _system_call(self, system_call_arguments: List[str]):
+        self._system_call_handler.run(system_call_arguments)
 
     def _read_result(self):
-        # read result.txt and return the read value
-        pass
-
-    def _write_result(self):
-        pass
-
-    def _full_read_result(self):
-        # read result.txt and return the read value
-        pass
-
-    def _help_result(self):
-        pass
+        return self._system_call_handler.get_result()
