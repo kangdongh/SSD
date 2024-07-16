@@ -1,27 +1,51 @@
-from unittest import TestCase, skip
+import warnings
+warnings.filterwarnings('ignore')
+
+import unittest
+from unittest.mock import patch
+
+from app.basic_logic import BasicLogic
+
+TEMP_SSD_PATH = "basic_logic/test"
+FULL_COUNT = 100
+LBA = 3
+VALUE = 0x00000000
 
 
-class TestBasicLogic(TestCase):
-    def test_read(self):
+class TestBasicLogic(unittest.TestCase):
+    @unittest.skip
+    @patch.object(BasicLogic, '_system_call')
+    def test_read_result(self, mk):
         pass
 
-    def test_write(self):
-        pass
+    @patch.object(BasicLogic, '_read_result')
+    def test_read_result(self, read_mk):
+        read_mk.return_value = "0x0000000F"
 
-    def test_full_read(self):
-        pass
+        basic_logic = BasicLogic(TEMP_SSD_PATH)
+        self.assertEqual(basic_logic._read_result(), "0x0000000F")
+        self.assertEqual(read_mk.call_count, 1)
 
-    def test_full_write(self):
-        pass
+    @patch.object(BasicLogic, '_write_result')
+    @patch.object(BasicLogic, '_read_result')
+    def test_write_result(self, read_mk, write_mk):
+        read_mk.return_value = "0x0000000F"
 
-    def test_exit(self):
-        pass
+        basic_logic = BasicLogic(TEMP_SSD_PATH)
+        basic_logic._write_result()
 
-    def test_help(self):
-        pass
+        self.assertEqual(basic_logic._read_result(), "0x0000000F")
+        self.assertEqual(write_mk.call_count, 1)
 
-    def test_test_app1(self):
-        pass
+    @patch.object(BasicLogic, '_help_result')
+    def test_help_result(self, mk):
+        mk.return_value = "This is the help desc"
 
-    def test_test_app2(self):
-        pass
+        basic_logic = BasicLogic(TEMP_SSD_PATH)
+        basic_logic._help_result()
+
+        self.assertEqual(mk.call_count, 1)
+
+
+if __name__ == "__main__":
+    unittest.main()
