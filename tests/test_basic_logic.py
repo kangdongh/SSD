@@ -16,8 +16,7 @@ VALUE = 0x00000000
 
 class TestBasicLogic(unittest.TestCase):
     def setUp(self):
-        self.sut = BasicLogic("basic_logic/test")
-        self.sut = Mock()
+        self.sut = Mock(spec=BasicLogic("basic_logic/test"))
         self.output = io.StringIO()
 
     @unittest.skip
