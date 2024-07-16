@@ -30,7 +30,7 @@ class CommandValidator:
     def _is_valid_cmd_length(self, cmds):
         if len(cmds) == 0:
             return False
-        if cmds[0] in ['EXIT', 'HELP', 'FULLREAD'] + TESTAPP_LIST and len(cmds) != 1:
+        if cmds[0] in ['EXIT', 'HELP', 'FULLREAD'] + self.TESTAPP_LIST and len(cmds) != 1:
             return False
         if cmds[0] in ['READ', 'FULLWRITE'] and len(cmds) != 2:
             return False
