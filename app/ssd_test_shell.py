@@ -118,9 +118,9 @@ class SSDTestShell:
 def main():
     import os.path
 
-    current_file_abspath = os.path.abspath(__file__)
-    ssd_path = os.path.join(current_file_abspath, '../hardware/ssd.py')
-    result_file_path = os.path.join(current_file_abspath, '../hardware/result.txt')
+    current_dir_abspath = os.path.dirname(os.path.abspath(__file__))
+    ssd_path = os.path.join(current_dir_abspath, '../hardware/ssd.py')
+    result_file_path = os.path.join(current_dir_abspath, '../hardware/result.txt')
     system_call_handler = SystemCallHandler(ssd_path, result_file_path)
 
     basic_logic = BasicLogic(system_call_handler)
