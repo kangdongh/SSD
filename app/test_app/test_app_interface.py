@@ -7,3 +7,7 @@ class ITestApp(ABC):
     @abstractmethod
     def run(self, basic_logic: BasicLogic):
         pass
+
+    @abstractmethod
+    def help(self) -> str:
+        pass
