@@ -15,3 +15,6 @@ class TestApp1(ITestApp):
         for result in results:
             if result.lower() != TestApp1.FULL_WRITE_VALUE.lower():
                 raise RuntimeError(f"{self.__class__.__name__} Failure")
+
+    def help(self):
+        return f"{self.__class__.__name__}: Full-Write / Read Test\n"

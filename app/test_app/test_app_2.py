@@ -31,3 +31,6 @@ class TestApp2(ITestApp):
 
     def _predefined_range(self):
         return range(TestApp2.PREDEFINED_LBA_HEAD, TestApp2.PREDEFINED_LBA_TAIL + 1)
+
+    def help(self):
+        return f"{self.__class__.__name__}: SSD Endurance Test\n"
