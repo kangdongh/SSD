@@ -8,8 +8,8 @@ from hardware.ssd_writer import SSDWriter
 TEST_DATA_FILE_PATH = './test_nand.txt'
 TEST_RESULT_FILE_PATH = './test_result.txt'
 INITIAL_DATA_VALUE = '0x00000000'
-print(os.path.abspath(__file__).split('tests')[0])
-SSD_PATH = os.path.join(os.path.abspath(__file__).split('tests')[0], '/hardware/ssd.py')
+SSD_PATH = os.path.join(os.path.abspath(__file__), '../../hardware/ssd.py')
+
 
 class TestSSD(TestCase):
     def setUp(self):
@@ -19,13 +19,18 @@ class TestSSD(TestCase):
         os.remove(TEST_DATA_FILE_PATH)
         os.remove(TEST_RESULT_FILE_PATH)
 
+    def get_lines(self, file_name):
+        with open(file_name, 'r') as f:
+            lines = [line.strip() for line in f.readlines()]
+        return lines
+
     def test_initialize_if_file_not_exist_before(self):
         self.assertEqual(True, os.path.exists(TEST_DATA_FILE_PATH))
         self.assertEqual(True, os.path.exists(TEST_RESULT_FILE_PATH))
 
-        with open(TEST_DATA_FILE_PATH, 'r') as data_file:
-            for _ in range(100):
-                self.assertEqual(INITIAL_DATA_VALUE, data_file.readline().strip())
+        lines = self.get_lines(TEST_DATA_FILE_PATH)
+        for i in range(100):
+            self.assertEqual(INITIAL_DATA_VALUE, lines[i])
 
     def test_initialize_if_file_exist_before(self):
         with open(TEST_DATA_FILE_PATH, 'w') as data_file:
@@ -35,12 +40,12 @@ class TestSSD(TestCase):
 
         self.ssd.initialize()
 
-        with open(TEST_DATA_FILE_PATH, 'r') as data_file:
-            self.assertEqual('0xAAAAAAAA', data_file.readline().strip())
-            self.assertEqual('0xBBBBBBBB', data_file.readline().strip())
-            self.assertEqual('0xCCCCCCCC', data_file.readline().strip())
-            for _ in range(97):
-                self.assertEqual(INITIAL_DATA_VALUE, data_file.readline().strip())
+        lines = self.get_lines(TEST_DATA_FILE_PATH)
+        self.assertEqual('0xAAAAAAAA', lines[0])
+        self.assertEqual('0xBBBBBBBB', lines[1])
+        self.assertEqual('0xCCCCCCCC', lines[2])
+        for i in range(3, 100):
+            self.assertEqual(INITIAL_DATA_VALUE, lines[i])
 
     def assert_ssd_run_raises(self, args):
         with self.assertRaises(Exception):
@@ -66,14 +71,12 @@ class TestSSD(TestCase):
 
         self.ssd.run(['ssd', 'R', '2'])
 
-        with open(TEST_RESULT_FILE_PATH, 'r') as result_file:
-            self.assertEqual('0x00000002', result_file.readline().strip())
+        lines = self.get_lines(TEST_RESULT_FILE_PATH)
+        self.assertEqual('0x00000002', lines[0])
 
     def test_run_write(self):
         target_address = 6
         self.ssd.run(['ssd', 'W', str(target_address), '0x00000002'])
 
-        with open(TEST_DATA_FILE_PATH, 'r') as data_file:
-            for i in range(target_address):
-                data_file.readline()
-            self.assertEqual('0x00000002', data_file.readline().strip())
+        lines = self.get_lines(TEST_DATA_FILE_PATH)
+        self.assertEqual('0x00000002', lines[target_address])
