@@ -1,4 +1,5 @@
 from app.basic_logic import BasicLogic
+from app.system_call_handler import SystemCallHandler
 from app.test_app.test_app_1 import TestApp1
 from app.test_app.test_app_2 import TestApp2
 from app.test_app.test_app_interface import ITestApp
@@ -114,8 +115,10 @@ if __name__ == '__main__':
 
     current_file_abspath = os.path.abspath(__file__)
     ssd_path = os.path.join(current_file_abspath, '../hardware/ssd.py')
+    result_file_path = os.path.join(current_file_abspath, '../hardware/result.txt')
+    system_call_handler = SystemCallHandler(ssd_path, result_file_path)
+    app = TestShell(BasicLogic(system_call_handler))
 
-    app = TestShell(BasicLogic(ssd_path))
     app.set_apps(TestApp1(), TestApp2())
     while True:
         try:
