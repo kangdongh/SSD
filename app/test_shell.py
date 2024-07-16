@@ -112,7 +112,7 @@ if __name__ == '__main__':
     while True:
         try:
             inp = input()
-            inp = inp.lower()
+            inp = inp.upper()
             # validation
             if not app.is_valid_command(inp):
                 print("INVALID COMMAND")
