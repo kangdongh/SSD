@@ -15,5 +15,5 @@ class SystemCallHandler:
 
     def get_result(self) -> str:
         with open(self._result_file_path, 'r') as f:
-            ret = f.readline()
+            ret = f.readline().strip()
         return ret
