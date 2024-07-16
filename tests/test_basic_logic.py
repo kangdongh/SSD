@@ -16,14 +16,13 @@ class TestBasicLogic(TestCase):
         self.system_call_handler.get_result.return_value = VALUE
         self.sut = BasicLogic(self.system_call_handler)
 
-    @skip
     def test_read_result(self):
         ret = self.sut.read(LBA)
 
         self.assertEqual(ret, VALUE)
         self.system_call_handler.run.assert_called_once()
         self.system_call_handler.run.assert_any_call(['R', LBA])
-        self.system_call_handler.get_result.assert_call_once()
+        self.system_call_handler.get_result.assert_called_once()
 
     def test_write_result(self):
         self.sut.write(LBA, VALUE)
@@ -31,7 +30,6 @@ class TestBasicLogic(TestCase):
         self.system_call_handler.run.assert_called_once()
         self.system_call_handler.run.assert_any_call(['W', LBA, VALUE])
 
-    @skip
     def test_full_read(self):
         expected_result = '\n'.join([VALUE] * NUM_LBA)
 
