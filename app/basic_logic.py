@@ -10,11 +10,15 @@ HELP_DESC = textwrap.dedent("""
 - help: Help command
 - fullwrite: Write value at all LBAs / usage: fullwrite <VALUE>
 - fullread: Read all LBAs / usage: fullread
+- erase : Erase value of SIZE from LBA on SSD / usage : erase <LBA> <SIZE>
+- erase_range : Erase value from startLBA to endLBA on SSD / usage : erase_range <Start LBA>  <End LBA> 
 """).strip()
 
 
 class BasicLogic:
     _system_call_handler: SystemCallHandler
+
+    MAX_DATA_LEN = 100
 
     def __init__(self, system_call_handler: SystemCallHandler):
         self._system_call_handler = system_call_handler
@@ -38,6 +42,24 @@ class BasicLogic:
 
     def help(self) -> str:
         return HELP_DESC
+
+    def erase(self, lba: str, size: str) -> None:
+        lba = int(lba)
+        size = int(size)
+
+        if lba + size > BasicLogic.MAX_DATA_LEN:
+            size = BasicLogic.MAX_DATA_LEN - lba
+
+        while size > 0:
+            current_size = min(size, 10)
+            self._system_call(['E', str(lba), str(current_size)])
+            size -= current_size
+            lba += 10
+
+    def erase_range(self, start_lba: str, end_lba: str) -> None:
+        start_lba = int(start_lba)
+        size = int(end_lba) - int(start_lba)
+        self.erase(str(start_lba), str(size))
 
     def _system_call(self, system_call_arguments: List[str]):
         self._system_call_handler.run(system_call_arguments)
