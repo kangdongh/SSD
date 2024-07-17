@@ -4,10 +4,12 @@ import sys
 from datetime import datetime
 from threading import Lock
 
+
 class CloseFileHandler(logging.FileHandler):
     def emit(self, record):
         super().emit(record)
         self.close()
+
 
 class CommandLogger:
     _instance = None
@@ -81,6 +83,3 @@ class CommandLogger:
         self.logger = self._setup_logger(name)
         self._rotate_log(self.logger)
         return self.logger
-
-# Usage
-
