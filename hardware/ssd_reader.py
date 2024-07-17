@@ -2,16 +2,16 @@ from hardware.ssd_reader_interface import ISSDReader
 
 
 class SSDReader(ISSDReader):
+    def __init__(self, read_file_name):
+        self._read_file_name = read_file_name
 
     def read(
             self,
-            read_file_name,
             logical_bytes_address: int
     ) -> str:
-        return self.read_from_line(read_file_name, logical_bytes_address)
+        return self.read_from_line(self._read_file_name, logical_bytes_address)
 
     def read_from_line(self, read_file_name, logical_bytes_address) -> str:
-
         try:
             with open(read_file_name, 'r', encoding='utf-8') as file_handler:
                 lines = file_handler.readlines()

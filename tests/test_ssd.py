@@ -12,7 +12,7 @@ INITIAL_DATA_VALUE = '0x00000000'
 
 class TestSSD(TestCase):
     def setUp(self):
-        self.ssd = SSD(SSDReader(), SSDWriter(), TEST_DATA_FILE_PATH, TEST_RESULT_FILE_PATH)
+        self.ssd = SSD(TEST_DATA_FILE_PATH, TEST_RESULT_FILE_PATH)
 
     def tearDown(self):
         os.remove(TEST_DATA_FILE_PATH)
