@@ -4,6 +4,7 @@ import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import textwrap
+from typing import List
 
 from app.basic_logic import BasicLogic
 from app.system_call_handler import SystemCallHandler
@@ -104,6 +105,7 @@ class SSDTestShell:
         self._params = cmd_split[1:] if len(cmd_split) > 1 else None
 
     def run(self, cmd) -> int:
+        print(cmd)
         self._set_command(cmd.split(" "))
         if self._cmd == 'EXIT':
             return -1
@@ -139,8 +141,43 @@ class SSDTestShell:
             except Exception as e:
                 print(str(e))
 
+    def run_test_app(self, cmd) -> int:
+        self._set_command(cmd.split(" "))
 
-def main():
+        try:
+            if self._cmd == 'TESTAPP1':
+                self._test_app1.run(self._logic)
+            elif self._cmd == 'TESTAPP2':
+                self._test_app2.run(self._logic)
+            else:
+                return -1
+
+            print(f'{self._cmd} --- Run ... Pass')
+            return 0
+        except Exception as e:
+            return -1
+        except RuntimeError as e:
+            return -1
+
+    def start_runner(self, runner_file_path):
+        runner_file_path = os.path.abspath(runner_file_path)
+
+        with open(runner_file_path, 'r') as file:
+            lines = file.readlines()
+
+            for line in lines:
+                line = line.rstrip()
+                if not self._validator.is_valid_command(line):
+                    print(f'{line.split()[0]} --- Run ... Fail!')
+                    break
+
+                run_flag = self.run_test_app(line)
+                if run_flag == -1:
+                    print(f'{line.split()[0]} --- Run ... Fail!')
+                    break
+
+
+def main(sys_argv: List[str]):
     import os.path
     current_dir_abspath = os.path.dirname(os.path.abspath(__file__))
     ssd_path = os.path.join(current_dir_abspath, '../hardware/ssd.py')
@@ -155,8 +192,11 @@ def main():
     test_app2 = TestApp2()
     shell.set_apps(test_app1, test_app2)
 
-    shell.start_progress()
+    if len(sys_argv) > 1:
+        shell.start_runner(sys_argv[1])
+    else:
+        shell.start_progress()
 
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv)
