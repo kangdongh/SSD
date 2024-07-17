@@ -212,15 +212,7 @@ def main():
 
     try:
         ssd = SSD()
-        # ssd.run(sys.argv)
-        ssd.run(['ssd', 'W', '0', '0x00AA00BB'])
-        # ssd.run(['ssd', 'E', '0', '4'])
-        ssd.run(['ssd', 'R', '0'])
-        # ssd.run(['ssd', 'W', '1', '0x00EE00EE'])
-        # ssd.run(['ssd', 'W', '5', '0x00DD00DD'])
-        # ssd.run(['ssd', 'W', '7', '0x00CC00CC'])
-        # ssd.run(['ssd', 'W', '1', '0x00BB00BB'])
-        # ssd.run(['ssd', 'R', '1'])
+        ssd.run(sys.argv)
     except Exception as e:
         print(e)
 
