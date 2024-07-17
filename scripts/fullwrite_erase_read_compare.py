@@ -8,9 +8,12 @@ ERASE_VALUE = '0x00000000'
 
 
 def fullwrite_erase_read_compare():
+    print("full write...")
     for lba in range(100):
         write_ssd(lba, FULL_WRITE_VALUE)
+    print("partial erase...")
     erase_ssd(50, 45)
+    print("check...")
     for lba in range(50):
         read_value = read_ssd(lba)
         if read_value != FULL_WRITE_VALUE:
