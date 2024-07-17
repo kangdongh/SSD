@@ -105,7 +105,6 @@ class SSDTestShell:
         self._params = cmd_split[1:] if len(cmd_split) > 1 else None
 
     def run(self, cmd) -> int:
-        print(cmd)
         self._set_command(cmd.split(" "))
         if self._cmd == 'EXIT':
             return -1
