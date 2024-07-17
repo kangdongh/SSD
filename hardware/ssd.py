@@ -13,12 +13,14 @@ RESULT_FILE_DIR = os.path.join(CURRENT_FILE_PATH, 'result.txt')
 
 class SSD(ISSD):
     CMD_READ_LENGTH = 3
-    CMD_WRITE_LENGTH = 4
+    CMD_WRITE_LENGTH = CMD_ERASE_LENGTH = 4
     CMD_READ_TYPE = 'R'
     CMD_WRITE_TYPE = 'W'
+    CMD_ERASE_TYPE = 'E'
     INITIAL_DATA_VALUE = '0x00000000'
     DATA_LENGTH = 10
 
+    MAX_ERASE_SIZE = 10
     MAX_DATA_LEN = 100
     MAX_RESULT_LEN = 1
 
@@ -29,10 +31,12 @@ class SSD(ISSD):
     ):
         self._data_file_dir = data_file_dir
         self._data_reader = SSDReader(data_file_dir)
-        self._data_writer = SSDWriter(data_file_dir, max_lba=100)
+        self._data_writer = SSDWriter(data_file_dir, max_lba=SSD.MAX_DATA_LEN)
 
         self._result_file_dir = result_file_dir
-        self._result_writer = SSDWriter(result_file_dir, max_lba=1)
+        self._result_writer = SSDWriter(result_file_dir, max_lba=SSD.MAX_RESULT_LEN)
+
+        self._command_list = [SSD.CMD_READ_TYPE, SSD.CMD_WRITE_TYPE, SSD.CMD_ERASE_TYPE]
 
         self.initialize()
 
@@ -56,13 +60,19 @@ class SSD(ISSD):
         elif cmd_type == SSD.CMD_WRITE_TYPE:
             data = argv[3]
             self._write(lba, data)
+        elif cmd_type == SSD.CMD_ERASE_TYPE:
+            size = int(argv[3])
+            self._erase(lba, size)
 
     def _read(self, address):
         read_value = self._data_reader.read(address)
         self._result_writer.write(0, 1, read_value)
 
     def _write(self, address, data):
-        return self._data_writer.write(address, 1, data)
+        self._data_writer.write(address, 1, data)
+
+    def _erase(self, address, size):
+        self._data_writer.write(address, size, SSD.INITIAL_DATA_VALUE)
 
     def _is_valid_cmd(self, argv: List[str]):
         if not self._check_cmd_syntax(argv):
@@ -72,7 +82,6 @@ class SSD(ISSD):
         return True
 
     def _check_cmd_syntax(self, argv: List[str]):
-        # syntax check
         if len(argv) < SSD.CMD_READ_LENGTH:
             return False
         cmd_type = argv[1]
@@ -80,25 +89,37 @@ class SSD(ISSD):
 
         if not lba.isdigit():
             return False
-
-        if not (cmd_type == SSD.CMD_READ_TYPE or cmd_type == SSD.CMD_WRITE_TYPE):
+        if cmd_type not in self._command_list:
             return False
         elif cmd_type == SSD.CMD_READ_TYPE and len(argv) != SSD.CMD_READ_LENGTH:
             return False
         elif cmd_type == SSD.CMD_WRITE_TYPE and len(argv) != SSD.CMD_WRITE_LENGTH:
+            return False
+        elif cmd_type == SSD.CMD_ERASE_TYPE and len(argv) != SSD.CMD_ERASE_LENGTH and (not argv[3].isdigit()):
             return False
 
         return True
 
     def _check_cmd_semantic(self, argv: List[str]):
         cmd_type = argv[1]
-        lba = argv[2]
-        if int(lba) >= SSD.MAX_DATA_LEN:
+        lba = int(argv[2])
+        if lba >= SSD.MAX_DATA_LEN:
             return False
         if cmd_type == SSD.CMD_WRITE_TYPE:
             data = argv[3]
             if not self._is_valid_data(data):
                 return False
+        if cmd_type == SSD.CMD_ERASE_TYPE:
+            size = int(argv[3])
+            if not self._is_erasable(lba, size):
+                return False
+        return True
+
+    def _is_erasable(self, lba: int, size: int):
+        if size > SSD.MAX_ERASE_SIZE:
+            return False
+        if (lba + size) > SSD.MAX_DATA_LEN:
+            return False
         return True
 
     def _is_valid_data(self, data):
