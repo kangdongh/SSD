@@ -1,6 +1,6 @@
 import os
-import sys
 import textwrap
+
 from app.basic_logic import BasicLogic
 from app.system_call_handler import SystemCallHandler
 from app.test_app.test_app_1 import TestApp1
@@ -17,6 +17,7 @@ HELP_PREFIX = textwrap.dedent("""
 HELP_POSTFIX = textwrap.dedent("""
 *********************************************************
 """).strip()
+
 
 class CommandValidator:
     COMMAND_LIST = ['READ', 'WRITE', 'EXIT', 'HELP', 'FULLREAD', 'FULLWRITE']
@@ -76,13 +77,15 @@ class CommandValidator:
             return False
         return self._get_hex(bytes[2:]) >= 0
 
+
 class SSDTestShell:
     INVALID_CMD = "INVALID COMMAND"
     _logic: BasicLogic
     _test_app1: ITestApp
     _test_app2: ITestApp
 
-    def __init__(self, basic_logic: BasicLogic, validator: CommandValidator, logger: CommandLogger, test_app1=None, test_app2=None):
+    def __init__(self, basic_logic: BasicLogic, validator: CommandValidator, logger: CommandLogger, test_app1=None,
+                 test_app2=None):
         self._logic = basic_logic
         self._validator = validator
         self._logger = logger
@@ -146,6 +149,7 @@ class SSDTestShell:
             except Exception as e:
                 print(str(e))
 
+
 def main():
     current_dir_abspath = os.path.dirname(os.path.abspath(__file__))
     ssd_path = os.path.join(current_dir_abspath, '../hardware/ssd.py')
@@ -163,8 +167,6 @@ def main():
 
     shell.start_progress()
 
+
 if __name__ == '__main__':
     main()
-
-
-
