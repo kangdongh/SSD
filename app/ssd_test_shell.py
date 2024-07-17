@@ -4,6 +4,7 @@ import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import textwrap
+from typing import List
 
 from app.basic_logic import BasicLogic
 from app.system_call_handler import SystemCallHandler
@@ -23,7 +24,7 @@ HELP_POSTFIX = textwrap.dedent("""
 
 
 class CommandValidator:
-    COMMAND_LIST = ['READ', 'WRITE', 'EXIT', 'HELP', 'FULLREAD', 'FULLWRITE']
+    COMMAND_LIST = ['READ', 'WRITE', 'EXIT', 'HELP', 'FULLREAD', 'FULLWRITE', 'ERASE', 'ERASE_RANGE']
     TESTAPP_LIST = ['TESTAPP1', 'TESTAPP2']
 
     def _get_integer(self, value):
@@ -53,7 +54,7 @@ class CommandValidator:
             return False
         if cmds[0] in ['READ', 'FULLWRITE'] and len(cmds) != 2:
             return False
-        if cmds[0] in ['WRITE'] and len(cmds) != 3:
+        if cmds[0] in ['WRITE', 'ERASE', 'ERASE_RANGE'] and len(cmds) != 3:
             return False
         return True
 
@@ -61,8 +62,17 @@ class CommandValidator:
         return cmd in self.COMMAND_LIST or cmd in self.TESTAPP_LIST
 
     def _is_valid_address(self, cmd):
-        if cmd[0] not in ['WRITE', 'READ']:
+        if cmd[0] not in ['WRITE', 'READ', 'ERASE', 'ERASE_RANGE']:
             return True
+        if cmd[0] == 'ERASE':
+            address = self._get_integer(cmd[1])
+            size = self._get_integer(cmd[2])
+            return 0 <= address <= 99 and address + size <= 100 and size > 0
+        if cmd[0] == 'ERASE_RANGE':
+            start_address = self._get_integer(cmd[1])
+            end_address = self._get_integer(cmd[2])
+            return 0 <= start_address <= 99 and 0 <= end_address <= 100 and start_address < end_address
+
         address = self._get_integer(cmd[1])
         return 0 <= address <= 99
 
@@ -125,6 +135,11 @@ class SSDTestShell:
             self._test_app1.run(self._logic)
         elif self._cmd == 'TESTAPP2':
             self._test_app2.run(self._logic)
+        elif self._cmd == 'ERASE':
+            self._logic.erase(self._params[0], self._params[1])
+        elif self._cmd == 'ERASE_RANGE':
+            self._logic.erase_range(self._params[0], self._params[1])
+
         return 0
 
     def start_progress(self):
@@ -139,8 +154,43 @@ class SSDTestShell:
             except Exception as e:
                 print(str(e))
 
+    def run_test_app(self, cmd) -> int:
+        self._set_command(cmd.split(" "))
 
-def main():
+        try:
+            if self._cmd == 'TESTAPP1':
+                self._test_app1.run(self._logic)
+            elif self._cmd == 'TESTAPP2':
+                self._test_app2.run(self._logic)
+            else:
+                return -1
+
+            print(f'{self._cmd} --- Run ... Pass')
+            return 0
+        except Exception as e:
+            return -1
+        except RuntimeError as e:
+            return -1
+
+    def start_runner(self, runner_file_path):
+        runner_file_path = os.path.abspath(runner_file_path)
+
+        with open(runner_file_path, 'r') as file:
+            lines = file.readlines()
+
+            for line in lines:
+                line = line.rstrip()
+                if not self._validator.is_valid_command(line):
+                    print(f'{line.split()[0]} --- Run ... Fail!')
+                    break
+
+                run_flag = self.run_test_app(line)
+                if run_flag == -1:
+                    print(f'{line.split()[0]} --- Run ... Fail!')
+                    break
+
+
+def main(sys_argv: List[str]):
     import os.path
     current_dir_abspath = os.path.dirname(os.path.abspath(__file__))
     ssd_path = os.path.join(current_dir_abspath, '../hardware/ssd.py')
@@ -155,8 +205,11 @@ def main():
     test_app2 = TestApp2()
     shell.set_apps(test_app1, test_app2)
 
-    shell.start_progress()
+    if len(sys_argv) > 1:
+        shell.start_runner(sys_argv[1])
+    else:
+        shell.start_progress()
 
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv)

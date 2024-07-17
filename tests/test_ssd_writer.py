@@ -10,7 +10,7 @@ class TestSSDWriter(TestCase):
 
     def setUp(self):
         super().setUp()
-        self.ssd_writer = SSDWriter()
+        self.ssd_writer = SSDWriter(WRITE_FILE_NAME)
         self.file_handler = open(WRITE_FILE_NAME, 'w')
         for _ in range(100):
             self.file_handler.write(INIT_VALUE)
@@ -23,14 +23,14 @@ class TestSSDWriter(TestCase):
         logical_bytes_address = 3
         data_to_write = '0x9988FFFA'
 
-        self.ssd_writer.write(WRITE_FILE_NAME, logical_bytes_address, data_to_write)
+        self.ssd_writer.write(logical_bytes_address, 1, data_to_write)
         self.assertEqual(data_to_write, self.read_from_line(WRITE_FILE_NAME, logical_bytes_address))
 
     def test_success_write_to_line02(self):
         logical_bytes_address = 99
         data_to_write = '0x9988FFFB'
 
-        self.ssd_writer.write(WRITE_FILE_NAME, logical_bytes_address, data_to_write)
+        self.ssd_writer.write(logical_bytes_address, 1, data_to_write)
         self.assertEqual(data_to_write, self.read_from_line(WRITE_FILE_NAME, logical_bytes_address))
 
     def read_from_line(self, read_file_name, logical_bytes_address) -> str:

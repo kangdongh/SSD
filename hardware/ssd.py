@@ -4,69 +4,149 @@ from typing import List
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from hardware.ssd_interface import ISSD
 from hardware.ssd_reader import SSDReader
-from hardware.ssd_reader_interface import ISSDReader
 from hardware.ssd_writer import SSDWriter
-from hardware.ssd_writer_interface import ISSDWriter
 
 CURRENT_FILE_PATH = os.path.dirname(os.path.abspath(__file__))
 DATA_FILE_DIR = os.path.join(CURRENT_FILE_PATH, 'nand.txt')
 RESULT_FILE_DIR = os.path.join(CURRENT_FILE_PATH, 'result.txt')
+BUFFER_FILE_DIR = os.path.join(CURRENT_FILE_PATH, 'buffer.txt')
 
 
 class SSD(ISSD):
-    _reader: ISSDReader
-    _writer: ISSDWriter
-
+    CMD_FLUSH_LENGTH = 2
     CMD_READ_LENGTH = 3
-    CMD_WRITE_LENGTH = 4
+    CMD_WRITE_LENGTH = CMD_ERASE_LENGTH = 4
+
     CMD_READ_TYPE = 'R'
     CMD_WRITE_TYPE = 'W'
+    CMD_ERASE_TYPE = 'E'
+    CMD_FLUSH_TYPE = 'F'
+
     INITIAL_DATA_VALUE = '0x00000000'
     DATA_LENGTH = 10
 
+    MAX_ERASE_SIZE = 10
+    MAX_DATA_LEN = 100
+    MAX_RESULT_LEN = 1
+    MAX_BUFFER_LEN = 10
+
     def __init__(
             self,
-            ssd_reader: ISSDReader = SSDReader(),
-            ssd_writer: ISSDWriter = SSDWriter(),
             data_file_dir: str = DATA_FILE_DIR,
-            result_file_dir: str = RESULT_FILE_DIR
+            result_file_dir: str = RESULT_FILE_DIR,
+            buffer_file_dir: str = BUFFER_FILE_DIR
     ):
-        self._ssd_reader = ssd_reader
-        self._ssd_writer = ssd_writer
         self._data_file_dir = data_file_dir
+        self._data_reader = SSDReader(data_file_dir)
+        self._data_writer = SSDWriter(data_file_dir, max_lba=SSD.MAX_DATA_LEN)
+
         self._result_file_dir = result_file_dir
-        self._max_block_size = 100
+        self._result_writer = SSDWriter(result_file_dir, max_lba=SSD.MAX_RESULT_LEN)
+
+        self._buffer_file_dir = buffer_file_dir
+        self._buffer_reader = SSDReader(buffer_file_dir)
+        self._buffer = []
+        self._buffer_writer = SSDWriter(buffer_file_dir, max_lba=SSD.MAX_BUFFER_LEN)
+
+        self._command_list = [SSD.CMD_READ_TYPE, SSD.CMD_WRITE_TYPE, SSD.CMD_ERASE_TYPE, SSD.CMD_FLUSH_TYPE]
+
         self.initialize()
+
+    def __del__(self):
+        self._save_buffer_file()
+
+    def _save_buffer_file(self):
+        buf_size = len(self._buffer)
+        with open(self._buffer_file_dir, 'w') as buffer_file:
+            for i in range(buf_size):
+                for item in self._buffer[i]:
+                    buffer_file.write(item + ' ')
+                buffer_file.write('\n')
+            for _ in range(SSD.MAX_BUFFER_LEN - buf_size):
+                buffer_file.write('None\n')
+
+    def _load_buffer_file(self):
+        with open(self._buffer_file_dir, 'r') as buffer_file:
+            lines = [line.strip() for line in buffer_file.readlines()]
+            for line in lines:
+                if line == 'None':
+                    break
+                self._buffer.append(line.split())
 
     def initialize(self):
         if not os.path.exists(self._data_file_dir):
             with open(self._data_file_dir, 'w') as data_file:
-                for _ in range(self._max_block_size):
+                for _ in range(SSD.MAX_DATA_LEN):
                     data_file.write(f'{SSD.INITIAL_DATA_VALUE}\n')
 
         if not os.path.exists(self._result_file_dir):
             with open(self._result_file_dir, 'w') as result_file:
                 result_file.write('\n')
 
+        if os.path.exists(self._buffer_file_dir):
+            self._load_buffer_file()
+        else:
+            with open(self._buffer_file_dir, 'w') as buffer_file:
+                for _ in range(SSD.MAX_DATA_LEN):
+                    buffer_file.write('None\n')
+
     def run(self, argv: List[str]):
-        if not self.is_valid_cmd(argv):
+        if not self._is_valid_cmd(argv):
             raise Exception('INVALID COMMAND')
         cmd_type = argv[1]
-        lba = int(argv[2])
         if cmd_type == SSD.CMD_READ_TYPE:
-            self.read(lba)
-        elif cmd_type == SSD.CMD_WRITE_TYPE:
-            data = argv[3]
-            self.write(lba, data)
+            lba = int(argv[2])
+            self._read(lba)
+        elif cmd_type == SSD.CMD_WRITE_TYPE or cmd_type == SSD.CMD_ERASE_TYPE:
+            self._append_buffer_list(argv[1:])
+        elif cmd_type == SSD.CMD_FLUSH_TYPE:
+            self._flush()
+        else:
+            raise Exception('INVALID COMMAND')
 
-    def read(self, address):
-        read_value = self._ssd_reader.read(self._data_file_dir, address)
-        self._ssd_writer.write(self._result_file_dir, 0, read_value, 1)
+    def _append_buffer_list(self, argv: List[str]):
+        if len(self._buffer) == SSD.MAX_BUFFER_LEN:
+            self._flush()
+        self._buffer.append(argv)
 
-    def write(self, address, data):
-        return self._ssd_writer.write(self._data_file_dir, address, data)
+    def _flush(self):
+        for command in self._buffer:
+            command_type = command[0]
+            address = int(command[1])
+            if command_type == SSD.CMD_WRITE_TYPE:
+                self._write(address, command[2])
+            elif command_type == SSD.CMD_ERASE_TYPE:
+                self._erase(address, int(command[2]))
+        self._buffer.clear()
 
-    def is_valid_cmd(self, argv: List[str]):
+    def _read(self, address):
+        buffer_result = self._search_buffer(address)
+        if buffer_result[0]:
+            read_value = buffer_result[1]
+        else:
+            read_value = self._data_reader.read(address)
+        self._result_writer.write(0, 1, read_value)
+
+    def _search_buffer(self, address):
+        ret_val = [False, None]
+        for command in self._buffer:
+            command_type = command[0]
+            command_addr = int(command[1])
+            if command_type == SSD.CMD_WRITE_TYPE and command_addr == address:
+                ret_val = [True, command[2]]
+            elif command_type == SSD.CMD_ERASE_TYPE:
+                end_addr = command_addr + int(command[2])
+                if command_addr <= address < end_addr:
+                    ret_val = [True, SSD.INITIAL_DATA_VALUE]
+        return ret_val
+
+    def _write(self, address, data):
+        self._data_writer.write(address, 1, data)
+
+    def _erase(self, address, size):
+        self._data_writer.write(address, size, SSD.INITIAL_DATA_VALUE)
+
+    def _is_valid_cmd(self, argv: List[str]):
         if not self._check_cmd_syntax(argv):
             return False
         if not self._check_cmd_semantic(argv):
@@ -74,34 +154,44 @@ class SSD(ISSD):
         return True
 
     def _check_cmd_syntax(self, argv: List[str]):
-        # syntax check
-        if len(argv) < SSD.CMD_READ_LENGTH:
+        if len(argv) < SSD.CMD_FLUSH_LENGTH:
             return False
         cmd_type = argv[1]
-        lba = argv[2]
-
-        if not lba.isdigit():
+        if cmd_type not in self._command_list:
             return False
-
-        if not (cmd_type == SSD.CMD_READ_TYPE or cmd_type == SSD.CMD_WRITE_TYPE):
+        if cmd_type == SSD.CMD_FLUSH_TYPE and len(argv) != SSD.CMD_FLUSH_LENGTH:
             return False
-        elif cmd_type == SSD.CMD_READ_TYPE and len(argv) != SSD.CMD_READ_LENGTH:
+        elif cmd_type == SSD.CMD_READ_TYPE and (len(argv) != SSD.CMD_READ_LENGTH or not argv[2].isdigit()):
             return False
-        elif cmd_type == SSD.CMD_WRITE_TYPE and len(argv) != SSD.CMD_WRITE_LENGTH:
+        elif cmd_type == SSD.CMD_WRITE_TYPE and (len(argv) != SSD.CMD_WRITE_LENGTH or not argv[2].isdigit()):
+            return False
+        elif cmd_type == SSD.CMD_ERASE_TYPE and (
+                len(argv) != SSD.CMD_ERASE_LENGTH or not argv[2].isdigit() or not argv[3].isdigit()):
             return False
 
         return True
 
     def _check_cmd_semantic(self, argv: List[str]):
         cmd_type = argv[1]
-        lba = argv[2]
-        if int(lba) >= self._max_block_size:
+        if cmd_type == SSD.CMD_FLUSH_TYPE:
+            return True
+        lba = int(argv[2])
+        if lba >= SSD.MAX_DATA_LEN:
             return False
         if cmd_type == SSD.CMD_WRITE_TYPE:
             data = argv[3]
             if not self._is_valid_data(data):
                 return False
+        if cmd_type == SSD.CMD_ERASE_TYPE:
+            size = int(argv[3])
+            if not self._is_erasable(lba, size):
+                return False
         return True
+
+    def _is_erasable(self, lba: int, size: int):
+        if size <= SSD.MAX_ERASE_SIZE and (lba + size) <= SSD.MAX_DATA_LEN:
+            return True
+        return False
 
     def _is_valid_data(self, data):
         if len(data) != SSD.DATA_LENGTH:

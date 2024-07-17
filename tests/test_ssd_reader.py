@@ -13,19 +13,18 @@ class TestSSDReader(TestCase):
     def setUp(self):
         self.file_handler = open(READ_FILE_DIR, 'w')
         for _ in range(50):
-            self.file_handler.write(VALUE_FIRST+'\n')
+            self.file_handler.write(VALUE_FIRST + '\n')
         for _ in range(50):
-            self.file_handler.write(VALUE_SECOND+'\n')
+            self.file_handler.write(VALUE_SECOND + '\n')
         self.file_handler.close()
 
     def tearDown(self):
         os.remove(READ_FILE_DIR)
 
-
     def test_read(self):
-        ssd_reader = SSDReader()
+        ssd_reader = SSDReader(READ_FILE_DIR)
 
         for target_address in range(100):
             answer = VALUE_FIRST if target_address < 50 else VALUE_SECOND
-            ret = ssd_reader.read(READ_FILE_DIR, target_address)
+            ret = ssd_reader.read(target_address)
             self.assertEqual(answer, ret)
