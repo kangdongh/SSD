@@ -65,6 +65,8 @@ class TestSSD(TestCase):
             self.assert_ssd_run_raises(['ssd', 'E', '98', '3'])
         with self.subTest("INVALID VALUE"):
             self.assert_ssd_run_raises(['ssd', 'E', '1', '11'])
+        with self.subTest("INVALID VALUE"):
+            self.assert_ssd_run_raises(['ssd', 'E', '1', 'A'])
 
     def test_run_read(self):
         with open(TEST_DATA_FILE_PATH, 'w') as data_file:
