@@ -14,9 +14,11 @@ RESULT_FILE_DIR = os.path.join(CURRENT_FILE_PATH, 'result.txt')
 class SSD(ISSD):
     CMD_READ_LENGTH = 3
     CMD_WRITE_LENGTH = CMD_ERASE_LENGTH = 4
+
     CMD_READ_TYPE = 'R'
     CMD_WRITE_TYPE = 'W'
     CMD_ERASE_TYPE = 'E'
+
     INITIAL_DATA_VALUE = '0x00000000'
     DATA_LENGTH = 10
 
@@ -118,11 +120,9 @@ class SSD(ISSD):
         return True
 
     def _is_erasable(self, lba: int, size: int):
-        if size > SSD.MAX_ERASE_SIZE:
-            return False
-        if (lba + size) > SSD.MAX_DATA_LEN:
-            return False
-        return True
+        if size <= SSD.MAX_ERASE_SIZE and (lba + size) <= SSD.MAX_DATA_LEN:
+            return True
+        return False
 
     def _is_valid_data(self, data):
         if len(data) != SSD.DATA_LENGTH:
