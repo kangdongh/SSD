@@ -2,12 +2,13 @@ import logging
 import os
 import sys
 from datetime import datetime
-import zipfile
+
 
 class CloseFileHandler(logging.FileHandler):
     def emit(self, record):
         super().emit(record)
         self.close()
+
 
 class CommandLogger:
     def __init__(self):
@@ -43,18 +44,24 @@ class CommandLogger:
 
     def _rotate_log(self, logger):
         if os.path.getsize(self.log_file) > 1024:  # 10KB
-            now = datetime.now().strftime("%Y%m%d_%H%M%S")
+            # 마지막 로그의 시간을 가져옵니다.
+            with open(self.log_file, 'r') as f:
+                lines = f.readlines()
+                last_log = lines[-1]
+                last_log_time = last_log.split(' - ')[0]
+                last_log_time = datetime.strptime(last_log_time, '%Y-%m-%d %H:%M:%S,%f')
+
+            now = last_log_time.strftime("%Y%m%d_%H%M%S")
             new_log_file = os.path.join(self.log_dir, f'{now}.txt')
             self._close_handlers(logger)
             os.rename(self.log_file, new_log_file)
 
-            previous_logs = [f for f in os.listdir(self.log_dir) if f.endswith('.txt') and f != 'latest.txt' and f != f'{now}.txt']
+            previous_logs = [f for f in os.listdir(self.log_dir) if
+                             f.endswith('.txt') and f != 'latest.txt' and f != f'{now}.txt']
             for old_log in previous_logs:
                 old_log_path = os.path.join(self.log_dir, old_log)
                 zip_filename = os.path.splitext(old_log_path)[0] + '.zip'
-                with zipfile.ZipFile(zip_filename, 'w', zipfile.ZIP_DEFLATED) as zipf:
-                    zipf.write(old_log_path, os.path.basename(old_log_path))
-                os.remove(old_log_path)
+                os.rename(old_log_path, zip_filename)
 
             self.logger = self._setup_logger(logger.name)
 
