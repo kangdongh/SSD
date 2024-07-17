@@ -9,6 +9,7 @@ from hardware.ssd_writer import SSDWriter
 CURRENT_FILE_PATH = os.path.dirname(os.path.abspath(__file__))
 DATA_FILE_DIR = os.path.join(CURRENT_FILE_PATH, 'nand.txt')
 RESULT_FILE_DIR = os.path.join(CURRENT_FILE_PATH, 'result.txt')
+BUFFER_FILE_DIR = os.path.join(CURRENT_FILE_PATH, 'buffer.txt')
 
 
 class SSD(ISSD):
@@ -25,11 +26,13 @@ class SSD(ISSD):
     MAX_ERASE_SIZE = 10
     MAX_DATA_LEN = 100
     MAX_RESULT_LEN = 1
+    MAX_BUFFER_LEN = 10
 
     def __init__(
             self,
             data_file_dir: str = DATA_FILE_DIR,
-            result_file_dir: str = RESULT_FILE_DIR
+            result_file_dir: str = RESULT_FILE_DIR,
+            buffer_file_dir: str = BUFFER_FILE_DIR
     ):
         self._data_file_dir = data_file_dir
         self._data_reader = SSDReader(data_file_dir)
@@ -38,9 +41,34 @@ class SSD(ISSD):
         self._result_file_dir = result_file_dir
         self._result_writer = SSDWriter(result_file_dir, max_lba=SSD.MAX_RESULT_LEN)
 
+        self._buffer_file_dir = buffer_file_dir
+        self._buffer_reader = SSDReader(buffer_file_dir)
+        self._buffer = []
+        self._buffer_writer = SSDWriter(buffer_file_dir, max_lba=SSD.MAX_BUFFER_LEN)
+
         self._command_list = [SSD.CMD_READ_TYPE, SSD.CMD_WRITE_TYPE, SSD.CMD_ERASE_TYPE]
 
         self.initialize()
+
+    def __del__(self):
+        buf_size = len(self._buffer)
+        with open(self._buffer_file_dir, 'w') as buffer_file:
+            for i in range(buf_size):
+                for item in self._buffer[i]:
+                    buffer_file.write(item + ' ')
+                buffer_file.write('\n')
+            for _ in range(SSD.MAX_BUFFER_LEN - buf_size):
+                buffer_file.write('None\n')
+
+    def save_buffer_file(self):
+        buf_size = len(self._buffer)
+        with open(self._buffer_file_dir, 'w') as buffer_file:
+            for i in range(buf_size):
+                for item in self._buffer[i]:
+                    buffer_file.write(item + ' ')
+                buffer_file.write('\n')
+            for _ in range(SSD.MAX_BUFFER_LEN - buf_size):
+                buffer_file.write('None\n')
 
     def initialize(self):
         if not os.path.exists(self._data_file_dir):
@@ -51,6 +79,18 @@ class SSD(ISSD):
         if not os.path.exists(self._result_file_dir):
             with open(self._result_file_dir, 'w') as result_file:
                 result_file.write('\n')
+
+        if os.path.exists(self._buffer_file_dir):
+            with open(self._buffer_file_dir, 'r') as buffer_file:
+                lines = [line.strip() for line in buffer_file.readlines()]
+                for line in lines:
+                    self._buffer.append(line.split())
+                    if line == 'None':
+                        break
+        else:
+            with open(self._buffer_file_dir, 'w') as buffer_file:
+                for _ in range(SSD.MAX_DATA_LEN):
+                    buffer_file.write('\n')
 
     def run(self, argv: List[str]):
         if not self._is_valid_cmd(argv):
