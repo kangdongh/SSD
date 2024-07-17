@@ -63,6 +63,8 @@ class SSD(ISSD):
         elif cmd_type == SSD.CMD_ERASE_TYPE:
             size = int(argv[3])
             self._erase(lba, size)
+        else:
+            raise Exception('INVALID COMMAND')
 
     def _read(self, address):
         read_value = self._data_reader.read(address)
@@ -95,7 +97,7 @@ class SSD(ISSD):
             return False
         elif cmd_type == SSD.CMD_WRITE_TYPE and len(argv) != SSD.CMD_WRITE_LENGTH:
             return False
-        elif cmd_type == SSD.CMD_ERASE_TYPE and len(argv) != SSD.CMD_ERASE_LENGTH and (not argv[3].isdigit()):
+        elif cmd_type == SSD.CMD_ERASE_TYPE and (len(argv) != SSD.CMD_ERASE_LENGTH or not argv[3].isdigit()):
             return False
 
         return True
