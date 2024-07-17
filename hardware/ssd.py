@@ -1,3 +1,4 @@
+import copy
 import os, sys
 from typing import List
 
@@ -45,8 +46,10 @@ class SSD(ISSD):
 
         self._buffer_file_dir = buffer_file_dir
         self._buffer_reader = SSDReader(buffer_file_dir)
-        self._buffer = []
         self._buffer_writer = SSDWriter(buffer_file_dir, max_lba=SSD.MAX_BUFFER_LEN)
+        self._buffer = []
+
+        self._buffer_optimizer = BufferOptimizer()
 
         self._command_list = [SSD.CMD_READ_TYPE, SSD.CMD_WRITE_TYPE, SSD.CMD_ERASE_TYPE, SSD.CMD_FLUSH_TYPE]
 
@@ -98,16 +101,17 @@ class SSD(ISSD):
             lba = int(argv[2])
             self._read(lba)
         elif cmd_type == SSD.CMD_WRITE_TYPE or cmd_type == SSD.CMD_ERASE_TYPE:
-            self._append_buffer_list(argv[1:])
+            self._edit_file(argv[1:])
         elif cmd_type == SSD.CMD_FLUSH_TYPE:
             self._flush()
         else:
             raise Exception('INVALID COMMAND')
 
-    def _append_buffer_list(self, argv: List[str]):
+    def _edit_file(self, argv: List[str]):
         if len(self._buffer) == SSD.MAX_BUFFER_LEN:
             self._flush()
         self._buffer.append(argv)
+        self._buffer = self._buffer_optimizer.optimize_command_buffer(self._buffer)
 
     def _flush(self):
         for command in self._buffer:
@@ -205,6 +209,49 @@ class SSD(ISSD):
             if char not in hex_digits:
                 return False
         return True
+
+
+class BufferOptimizer:
+    CMD_WRITE_TYPE = 'W'
+    CMD_ERASE_TYPE = 'E'
+
+    def optimize_command_buffer(self, buffer: List[List[str]]):
+        size = len(buffer)
+        optimized_buffer = copy.copy(buffer)
+        for i in range(size - 1):
+            cmd = optimized_buffer[size - 1 - i]
+            if cmd is None:
+                continue
+            optimized_buffer = self._optimize_if_prev_command_useless(cmd, size - 1 - i, optimized_buffer)
+        optimized_buffer = [e for e in optimized_buffer if e is not None]
+        return optimized_buffer
+
+    def _optimize_if_prev_command_useless(self, cur_cmd, cur_idx, current_buffer):
+        new_buffer = copy.copy(current_buffer)
+        if cur_cmd[0] == 'W':
+            cur_addr = int(cur_cmd[1])
+            for i in range(cur_idx):
+                prev_cmd = current_buffer[i]
+                if prev_cmd is None:
+                    continue
+                if prev_cmd[0] == 'W' and int(prev_cmd[1]) == cur_addr:
+                    new_buffer[i] = None
+
+        elif cur_cmd[0] == 'E':
+            start_addr = int(cur_cmd[1])
+            end_addr = start_addr + int(cur_cmd[2])
+            for i in range(cur_idx):
+                prev_cmd = current_buffer[i]
+                if prev_cmd is None:
+                    continue
+                if prev_cmd[0] == 'W' and start_addr <= int(prev_cmd[1]) < end_addr:
+                    new_buffer[i] = None
+                elif prev_cmd[0] == 'E':
+                    prev_start_addr = int(prev_cmd[1])
+                    prev_end_addr = prev_start_addr + int(prev_cmd[2])
+                    if start_addr <= prev_start_addr and prev_end_addr <= end_addr:
+                        new_buffer[i] = None
+        return new_buffer
 
 
 def main():
