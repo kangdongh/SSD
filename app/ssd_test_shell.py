@@ -66,7 +66,7 @@ class CommandValidator:
         if cmd[0] == 'ERASE':
             address = self._get_integer(cmd[1])
             size = self._get_integer(cmd[2])
-            return 0 <= address <= 99 and address + size <= 100
+            return 0 <= address <= 99 and address + size <= 100 and size > 0
         if cmd[0] == 'ERASE_RANGE':
             start_address = self._get_integer(cmd[1])
             end_address = self._get_integer(cmd[2])
