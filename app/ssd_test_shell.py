@@ -63,14 +63,17 @@ class CommandValidator:
     def _is_valid_address(self, cmd):
         if cmd[0] not in ['WRITE', 'READ', 'ERASE', 'ERASE_RANGE']:
             return True
-
-        if cmd[0] in ['WRITE', 'READ', 'ERASE']:
+        if cmd[0] == 'ERASE':
             address = self._get_integer(cmd[1])
-            return 0 <= address <= 99
-        else:
+            size = self._get_integer(cmd[2])
+            return 0 <= address <= 99 and address + size <= 100
+        if cmd[0] == 'ERASE_RANGE':
             start_address = self._get_integer(cmd[1])
             end_address = self._get_integer(cmd[2])
-            return 0 <= start_address <= 99 and 0 <= end_address <= 100 and start_address <= end_address
+            return 0 <= start_address <= 99 and 0 <= end_address <= 100 and start_address < end_address
+
+        address = self._get_integer(cmd[1])
+        return 0 <= address <= 99
 
     def _is_valid_value(self, cmd):
         bytes = None

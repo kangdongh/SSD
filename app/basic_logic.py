@@ -18,8 +18,6 @@ HELP_DESC = textwrap.dedent("""
 class BasicLogic:
     _system_call_handler: SystemCallHandler
 
-    MAX_DATA_LEN = 100
-
     def __init__(self, system_call_handler: SystemCallHandler):
         self._system_call_handler = system_call_handler
 
@@ -46,9 +44,6 @@ class BasicLogic:
     def erase(self, lba: str, size: str) -> None:
         lba = int(lba)
         size = int(size)
-
-        if lba + size > BasicLogic.MAX_DATA_LEN:
-            size = BasicLogic.MAX_DATA_LEN - lba
 
         while size > 0:
             current_size = min(size, 10)
