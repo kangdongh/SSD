@@ -3,6 +3,12 @@ import os
 import sys
 from datetime import datetime
 import zipfile
+
+class CloseFileHandler(logging.FileHandler):
+    def emit(self, record):
+        super().emit(record)
+        self.close()
+
 class CommandLogger:
     def __init__(self):
         self.log_dir = 'logs'
@@ -16,7 +22,7 @@ class CommandLogger:
         logger.setLevel(logging.DEBUG)
 
         if not logger.handlers:
-            file_handler = logging.FileHandler(self.log_file)
+            file_handler = CloseFileHandler(self.log_file)
             file_handler.setLevel(logging.DEBUG)
             formatter = logging.Formatter('%(asctime)s - %(name)s - %(funcName)s - %(message)s')
             file_handler.setFormatter(formatter)
