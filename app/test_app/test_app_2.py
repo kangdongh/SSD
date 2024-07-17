@@ -1,5 +1,6 @@
 from app.basic_logic import BasicLogic
 from app.test_app.test_app_interface import ITestApp
+from logger import CommandLogger
 
 
 class TestApp2(ITestApp):
@@ -9,7 +10,12 @@ class TestApp2(ITestApp):
     FIRST_WRITE_VALUE = '0xAAAABBBB'
     OVERWRITE_VALUE = '0x12345678'
 
+    def __init__(self, logger: CommandLogger = CommandLogger()):
+        self._logger = logger
+
     def run(self, basic_logic: BasicLogic):
+        logger = self._logger.get_logger('run', self.__class__.__name__, 'run')
+        logger.info(f'TESTAPP2 received.')
         for j in range(TestApp2.DUPL_WRITE_COUNT):
             self._write_values_for_predefined_lba_range(basic_logic, TestApp2.FIRST_WRITE_VALUE)
 

@@ -43,7 +43,7 @@ class CommandLogger:
             logger.removeHandler(handler)
 
     def _rotate_log(self, logger):
-        if os.path.getsize(self.log_file) > 1024:  # 10KB
+        if os.path.getsize(self.log_file) > 10240:  # 10KB
             # 마지막 로그의 시간을 가져옵니다.
             with open(self.log_file, 'r') as f:
                 lines = f.readlines()

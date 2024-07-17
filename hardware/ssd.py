@@ -1,5 +1,8 @@
-import os, sys
+import os
+import sys
 from typing import List
+
+from logger import CommandLogger
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from hardware.ssd_interface import ISSD
@@ -28,11 +31,13 @@ class SSD(ISSD):
             self,
             ssd_reader: ISSDReader = SSDReader(),
             ssd_writer: ISSDWriter = SSDWriter(),
+            logger: CommandLogger = CommandLogger(),
             data_file_dir: str = DATA_FILE_DIR,
             result_file_dir: str = RESULT_FILE_DIR
     ):
         self._ssd_reader = ssd_reader
         self._ssd_writer = ssd_writer
+        self._logger = logger
         self._data_file_dir = data_file_dir
         self._result_file_dir = result_file_dir
         self._max_block_size = 100
@@ -54,9 +59,13 @@ class SSD(ISSD):
         cmd_type = argv[1]
         lba = int(argv[2])
         if cmd_type == SSD.CMD_READ_TYPE:
+            logger = self._logger.get_logger('read', self.__class__.__name__, 'run')
+            logger.info(f'READ command received with param: {lba}')
             self.read(lba)
         elif cmd_type == SSD.CMD_WRITE_TYPE:
             data = argv[3]
+            logger = self._logger.get_logger('write', self.__class__.__name__, 'run')
+            logger.info(f'WRITE command received with params: {lba}, {data}')
             self.write(lba, data)
 
     def read(self, address):
