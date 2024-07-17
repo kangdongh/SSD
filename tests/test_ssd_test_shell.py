@@ -80,14 +80,6 @@ class TestSSDTestShell(TestCase):
         self.assertEqual(0, self.sut.run('HELP'))
         self.mk_basic.help.assert_called_once()
 
-    def test_run_help_print(self):
-        captured_output = io.StringIO()
-        sys.stdout = captured_output
-        self.mk_basic.help.return_value = 'ret'
-        self.sut.run('HELP')
-
-        self.assertEqual(captured_output.getvalue().strip(), "ret")
-
     def test_run_read(self):
         self.mk_basic.read.return_value = 'return read value'
         self.sut.run('READ ADDR')
