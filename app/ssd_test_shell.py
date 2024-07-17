@@ -24,7 +24,7 @@ HELP_POSTFIX = textwrap.dedent("""
 
 
 class CommandValidator:
-    COMMAND_LIST = ['READ', 'WRITE', 'EXIT', 'HELP', 'FULLREAD', 'FULLWRITE']
+    COMMAND_LIST = ['READ', 'WRITE', 'EXIT', 'HELP', 'FULLREAD', 'FULLWRITE', 'ERASE', 'ERASE_RANGE']
     TESTAPP_LIST = ['TESTAPP1', 'TESTAPP2']
 
     def _get_integer(self, value):
@@ -54,7 +54,7 @@ class CommandValidator:
             return False
         if cmds[0] in ['READ', 'FULLWRITE'] and len(cmds) != 2:
             return False
-        if cmds[0] in ['WRITE'] and len(cmds) != 3:
+        if cmds[0] in ['WRITE', 'ERASE', 'ERASE_RANGE'] and len(cmds) != 3:
             return False
         return True
 
@@ -62,8 +62,17 @@ class CommandValidator:
         return cmd in self.COMMAND_LIST or cmd in self.TESTAPP_LIST
 
     def _is_valid_address(self, cmd):
-        if cmd[0] not in ['WRITE', 'READ']:
+        if cmd[0] not in ['WRITE', 'READ', 'ERASE', 'ERASE_RANGE']:
             return True
+        if cmd[0] == 'ERASE':
+            address = self._get_integer(cmd[1])
+            size = self._get_integer(cmd[2])
+            return 0 <= address <= 99 and address + size <= 100 and size > 0
+        if cmd[0] == 'ERASE_RANGE':
+            start_address = self._get_integer(cmd[1])
+            end_address = self._get_integer(cmd[2])
+            return 0 <= start_address <= 99 and 0 <= end_address <= 100 and start_address < end_address
+
         address = self._get_integer(cmd[1])
         return 0 <= address <= 99
 
@@ -126,6 +135,11 @@ class SSDTestShell:
             self._test_app1.run(self._logic)
         elif self._cmd == 'TESTAPP2':
             self._test_app2.run(self._logic)
+        elif self._cmd == 'ERASE':
+            self._logic.erase(self._params[0], self._params[1])
+        elif self._cmd == 'ERASE_RANGE':
+            self._logic.erase_range(self._params[0], self._params[1])
+
         return 0
 
     def start_progress(self):
