@@ -90,6 +90,7 @@ class SSD(ISSD):
 
     def run(self, argv: List[str]):
         if not self._is_valid_cmd(argv):
+            logger.debug('[ ERROR ] invalid input arguments')
             raise Exception('INVALID COMMAND')
         logger.debug(f'[ START ] SSD: {self._create_log_message(argv)}')
         cmd_type = argv[1]
@@ -101,6 +102,7 @@ class SSD(ISSD):
         elif cmd_type == CMD_FLUSH_TYPE:
             self._flush()
         else:
+            logger.debug('[ ERROR ] invalid command type')
             raise Exception('INVALID COMMAND')
         logger.debug('[SUCCESS] SSD')
 
@@ -241,7 +243,7 @@ def main():
         ssd = SSD()
         ssd.run(sys.argv)
     except Exception as e:
-        logger.debug('[  FAIL ] invalid command input')
+        logger.debug('[  FAIL ] SSD')
         print(e)
 
 
