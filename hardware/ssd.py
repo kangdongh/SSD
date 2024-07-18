@@ -2,9 +2,8 @@ import os
 import sys
 from typing import List
 
-from customlogger.logger import CommandLogger
-
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from customlogger.logger import CommandLogger
 from hardware.ssd_interface import ISSD
 from hardware.ssd_reader import SSDReader
 from hardware.ssd_writer import SSDWriter
