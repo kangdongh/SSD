@@ -1,6 +1,7 @@
 import os.path
-import subprocess
 from typing import List
+
+from app.subprocess_wrapper import subprocess_run
 
 PREDEFINED_SSD_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../hardware/ssd.py')
 PREDEFINED_RESULT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../hardware/result.txt')
@@ -17,7 +18,7 @@ class SystemCallHandler:
     def run(self, system_call_arguments: List[str]):
         if not os.path.exists(self._ssd_path):
             raise RuntimeError(f"Invalid system call path: {self._ssd_path}")
-        subprocess.run(['python', self._ssd_path] + system_call_arguments)
+        subprocess_run(['python', self._ssd_path] + system_call_arguments)
 
     def get_result(self) -> str:
         if not os.path.exists(self._result_file_path):
@@ -31,4 +32,3 @@ class SystemCallHandler:
 
     def get_result_file_path(self):
         return os.path.abspath(self._result_file_path)
-

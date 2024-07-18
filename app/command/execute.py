@@ -1,10 +1,10 @@
 import os.path
-import subprocess
 from typing import List
 
 from app.command.interface import ICommand
 from app.input_checker import to_script_path
 from app.shell_api import ShellAPI
+from app.subprocess_wrapper import subprocess_run
 
 
 class ExecuteCommand(ICommand):
@@ -19,5 +19,4 @@ class ExecuteCommand(ICommand):
         self._script = script_path
 
     def run(self, api: ShellAPI):
-        subprocess.run(['python', self._script] + api.get_system_env())
-
+        subprocess_run(['python', self._script] + api.get_system_env())
