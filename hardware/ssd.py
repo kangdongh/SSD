@@ -17,6 +17,8 @@ CMD_WRITE_TYPE = 'W'
 CMD_ERASE_TYPE = 'E'
 CMD_FLUSH_TYPE = 'F'
 
+MAX_ERASE_SIZE = 10
+
 
 class SSD(ISSD):
     CMD_FLUSH_LENGTH = 2
@@ -26,7 +28,6 @@ class SSD(ISSD):
     INITIAL_DATA_VALUE = '0x00000000'
     DATA_LENGTH = 10
 
-    MAX_ERASE_SIZE = 10
     MAX_DATA_LEN = 100
     MAX_RESULT_LEN = 1
     MAX_BUFFER_LEN = 10
@@ -193,7 +194,7 @@ class SSD(ISSD):
         return True
 
     def _is_erasable(self, lba: int, size: int):
-        if size <= SSD.MAX_ERASE_SIZE and (lba + size) <= SSD.MAX_DATA_LEN:
+        if size <= MAX_ERASE_SIZE and (lba + size) <= SSD.MAX_DATA_LEN:
             return True
         return False
 
@@ -219,9 +220,34 @@ class BufferOptimizer:
             cmd = optimized_buffer[size - 1 - i]
             if cmd is None:
                 continue
+            self._optimize_if_prev_command_mergable(cmd, size - 1 - i, optimized_buffer)
+        for i in range(size - 1):
+            cmd = optimized_buffer[size - 1 - i]
+            if cmd is None:
+                continue
             self._optimize_if_prev_command_useless(cmd, size - 1 - i, optimized_buffer)
         optimized_buffer = [e for e in optimized_buffer if e is not None]
         return optimized_buffer
+
+    def _optimize_if_prev_command_mergable(self, cur_cmd: List[str], cur_idx: int, command_buffer: List):
+        prev_cmd = command_buffer[cur_idx - 1]
+        if prev_cmd is None:
+            return
+        cur_cmd_type = cur_cmd[0]
+        prev_cmd_type = prev_cmd[0]
+        if cur_cmd_type != CMD_ERASE_TYPE or prev_cmd_type != CMD_ERASE_TYPE:
+            return
+        cur_start_addr = int(cur_cmd[1])
+        cur_end_addr = cur_start_addr + int(cur_cmd[2])
+        prev_start_addr = int(prev_cmd[1])
+        prev_end_addr = prev_start_addr + int(prev_cmd[2])
+
+        if prev_end_addr == cur_start_addr and (cur_end_addr - prev_start_addr) <= MAX_ERASE_SIZE:
+            command_buffer[cur_idx - 1] = ['E', str(prev_start_addr), str(cur_end_addr - prev_start_addr)]
+            command_buffer[cur_idx] = None
+        elif cur_end_addr == prev_start_addr and (prev_end_addr - cur_start_addr) <= MAX_ERASE_SIZE:
+            command_buffer[cur_idx - 1] = ['E', str(cur_start_addr), str(prev_end_addr - cur_start_addr)]
+            command_buffer[cur_idx] = None
 
     def _optimize_if_prev_command_useless(self, cur_cmd: List[str], cur_idx: int, command_buffer: List):
         for i in range(cur_idx):
@@ -265,20 +291,6 @@ class BufferOptimizer:
         return cur_cmd_addr <= prev_cmd_addr and prev_end_addr <= cur_end_addr
 
 
-def test_main():
-    try:
-        ssd = SSD()
-        ssd.run(['ssd', 'W', '0', '0x00aa00bb'])
-        ssd.run(['ssd', 'W', '2', '0x00aa00bb'])
-        ssd.run(['ssd', 'W', '4', '0x00aa00bb'])
-        ssd.run(['ssd', 'W', '6', '0x00aa00bb'])
-        ssd.run(['ssd', 'W', '5', '0x00aa00bb'])
-        ssd.run(['ssd', 'W', '8', '0x00aa00bb'])
-        ssd.run(['ssd', 'E', '1', '3'])
-    except Exception as e:
-        print(e)
-
-
 def main():
     import sys
 
@@ -291,4 +303,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-    # test_main()
