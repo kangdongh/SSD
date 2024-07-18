@@ -22,13 +22,10 @@ class TestApp2(ITestApp):
         self._write_values_for_predefined_lba_range(basic_logic, TestApp2.OVERWRITE_VALUE)
         self._check_data_overwritten_for_predefined_lba_range(basic_logic)
 
-        print(f"{self.__class__.__name__} PASS")
-
     def _check_data_overwritten_for_predefined_lba_range(self, basic_logic):
         for i in self._predefined_range():
             read = basic_logic.read(str(i))
             if read != TestApp2.OVERWRITE_VALUE:
-                print(f"{self.__class__.__name__} Failure, read {read} vs Expected {TestApp2.OVERWRITE_VALUE}")
                 raise RuntimeError()
 
     def _write_values_for_predefined_lba_range(self, basic_logic, write_value):

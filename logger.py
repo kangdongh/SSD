@@ -1,5 +1,7 @@
 import logging
 import os
+import sys
+
 from datetime import datetime
 from threading import Lock
 
@@ -42,7 +44,6 @@ class CommandLogger:
             file_handler.setFormatter(formatter)
 
             logger.addHandler(file_handler)
-
         return logger
 
     def _close_handlers(self, logger):

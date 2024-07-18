@@ -15,7 +15,6 @@ class TestApp1(ITestApp):
         basic_logic.full_write(TestApp1.FULL_WRITE_VALUE)
         results = basic_logic.full_read().strip().split('\n')
         self._check_results_valid(results)
-        print(f"{self.__class__.__name__} PASS")
 
     def _check_results_valid(self, results):
         for result in results:

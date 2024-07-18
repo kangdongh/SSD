@@ -3,20 +3,20 @@ from logger import CommandLogger
 
 
 class SSDReader(ISSDReader):
-    def __init__(self, logger: CommandLogger = CommandLogger()):
+
+    def __init__(self, read_file_name, logger: CommandLogger = CommandLogger()):
+        self._read_file_name = read_file_name
         self._logger = logger
 
     def read(
             self,
-            read_file_name,
             logical_bytes_address: int
     ) -> str:
         logger = self._logger.get_logger('read', self.__class__.__name__, 'read')
         logger.info(f'READ function received with param: {read_file_name}, {logical_bytes_address}')
-        return self.read_from_line(read_file_name, logical_bytes_address)
+        return self.read_from_line(self._read_file_name, logical_bytes_address)
 
     def read_from_line(self, read_file_name, logical_bytes_address) -> str:
-
         try:
             with open(read_file_name, 'r', encoding='utf-8') as file_handler:
                 lines = file_handler.readlines()
