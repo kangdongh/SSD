@@ -1,6 +1,5 @@
 import os
 import sys
-from time import sleep
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -100,7 +99,8 @@ class SSDTestShell:
     _test_app2: ITestApp
     _test_app3: ITestApp
 
-    def __init__(self, basic_logic: BasicLogic, validator: CommandValidator, test_app1=None, test_app2=None, test_app3=None):
+    def __init__(self, basic_logic: BasicLogic, validator: CommandValidator, test_app1=None, test_app2=None,
+                 test_app3=None):
         self._logic = basic_logic
         self._validator = validator
         self._test_app1 = test_app1
@@ -162,20 +162,23 @@ class SSDTestShell:
             except Exception as e:
                 print(str(e))
 
+
+class SSDTestRunner:
+    _logic: BasicLogic
+
+    def __init__(self, basic_logic: BasicLogic):
+        self._logic = basic_logic
+        self._test_apps = {}
+
+    def set_apps(self, *test_apps):
+        for i in range(len(test_apps)):
+            key = "TESTAPP" + str(i + 1)
+            self._test_apps[key] = test_apps[i]
+
     def run_test_app(self, cmd) -> int:
-        self._set_command(cmd.split(" "))
-
         try:
-            if self._cmd == 'TESTAPP1':
-                self._test_app1.run(self._logic)
-            elif self._cmd == 'TESTAPP2':
-                self._test_app2.run(self._logic)
-            elif self._cmd == 'TESTAPP3':
-                self._test_app3.run(self._logic)
-            else:
-                return -1
+            self._test_apps.get(cmd).run(self._logic)
 
-            print(f'Pass')
             return 0
         except Exception as e:
             return -1
@@ -189,17 +192,19 @@ class SSDTestShell:
             lines = file.readlines()
 
             for line in lines:
-                line = line.rstrip()
-                print(f'{line} --- Run ...', end=' ', flush=True)
+                cmd = line.rstrip()
+                print(f'{cmd} --- Run ...', end=' ', flush=True)
 
-                if not self._validator.is_valid_command(line):
+                if cmd not in self._test_apps.keys():
                     print(f'Fail!')
                     break
 
-                run_flag = self.run_test_app(line)
+                run_flag = self.run_test_app(cmd)
                 if run_flag == -1:
                     print(f'Fail!')
                     break
+
+                print(f'Pass')
 
 
 def main(sys_argv: List[str]):
@@ -219,7 +224,10 @@ def main(sys_argv: List[str]):
     shell.set_apps(test_app1, test_app2, test_app3)
 
     if len(sys_argv) > 1:
-        shell.start_runner(sys_argv[1])
+        runner = SSDTestRunner(basic_logic)
+        runner.set_apps(TestApp1(), TestApp2(), TestApp3())
+
+        runner.start_runner(sys_argv[1])
     else:
         shell.start_progress()
 
