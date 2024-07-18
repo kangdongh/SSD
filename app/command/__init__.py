@@ -15,7 +15,6 @@ from app.command.read import ReadCommand
 from app.command.read import ReadCommand
 from app.command.write import WriteCommand
 from app.command.write import WriteCommand
-from app.input_checker import is_script_name, get_script_dir_path
 
 __COMMAND_DICT__ = {
     'EXIT': ExitCommand,
@@ -28,6 +27,8 @@ __COMMAND_DICT__ = {
     'ERASE_RANGE': EraseRangeCommand,
     'FLUSH': FlushCommand,
 }
+
+from app.scripts.script_path_utils import is_script_name, get_script_dir_path
 
 
 def command_factory(cmd: List[str]) -> ICommand:

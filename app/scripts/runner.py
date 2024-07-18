@@ -1,12 +1,9 @@
 import os.path
-from os.path import abspath, dirname
 from typing import List
 
-from app.input_checker import script_name_to_path
+from app.scripts.script_path_utils import script_name_to_path
 from app.shell_api import ShellAPI
 from app.subprocess_wrapper import subprocess_run_ignore_stdout
-
-SCRIPT_DIR_PATH = os.path.join(dirname(dirname(abspath(__file__))), "scripts")
 
 
 class ScriptsRunner:
@@ -28,8 +25,3 @@ class ScriptsRunner:
             else:
                 print("FAIL!")
                 return
-
-
-if __name__ == '__main__':
-    if os.path.exists(SCRIPT_DIR_PATH):
-        print(f"Exists: {SCRIPT_DIR_PATH}")
