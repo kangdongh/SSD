@@ -13,7 +13,7 @@ class SSDReader(ISSDReader):
             logical_bytes_address: int
     ) -> str:
         logger = self._logger.get_logger('read', self.__class__.__name__, 'read')
-        logger.info(f'READ function received with param: {read_file_name}, {logical_bytes_address}')
+        logger.info(f'READ function received with param: {self._read_file_name}, {logical_bytes_address}')
         return self.read_from_line(self._read_file_name, logical_bytes_address)
 
     def read_from_line(self, read_file_name, logical_bytes_address) -> str:
