@@ -12,6 +12,7 @@ HELP_DESC = textwrap.dedent("""
 - fullread: Read all LBAs / usage: fullread
 - erase : Erase value of SIZE from LBA on SSD / usage : erase <LBA> <SIZE>
 - erase_range : Erase value from startLBA to endLBA on SSD / usage : erase_range <Start LBA>  <End LBA> 
+- flush: Execute 10 commands in the Command Buffer to make the empty Buffer. / usage: flush
 """).strip()
 
 

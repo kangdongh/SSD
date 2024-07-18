@@ -10,6 +10,7 @@ from app.basic_logic import BasicLogic
 from app.system_call_handler import SystemCallHandler
 from app.test_app.test_app_1 import TestApp1
 from app.test_app.test_app_2 import TestApp2
+from app.test_app.test_app_3 import TestApp3
 from app.test_app.test_app_interface import ITestApp
 
 HELP_PREFIX = textwrap.dedent("""
@@ -25,7 +26,7 @@ HELP_POSTFIX = textwrap.dedent("""
 
 class CommandValidator:
     COMMAND_LIST = ['READ', 'WRITE', 'EXIT', 'HELP', 'FULLREAD', 'FULLWRITE', 'ERASE', 'ERASE_RANGE']
-    TESTAPP_LIST = ['TESTAPP1', 'TESTAPP2']
+    TESTAPP_LIST = ['TESTAPP1', 'TESTAPP2', 'TESTAPP3']
 
     def _get_integer(self, value):
         try:
@@ -96,18 +97,21 @@ class SSDTestShell:
     _logic: BasicLogic
     _test_app1: ITestApp
     _test_app2: ITestApp
+    _test_app3: ITestApp
 
-    def __init__(self, basic_logic: BasicLogic, validator: CommandValidator, test_app1=None, test_app2=None):
+    def __init__(self, basic_logic: BasicLogic, validator: CommandValidator, test_app1=None, test_app2=None, test_app3=None):
         self._logic = basic_logic
         self._validator = validator
         self._test_app1 = test_app1
         self._test_app2 = test_app2
+        self._test_app3 = test_app3
         self._cmd = None
         self._params = None
 
-    def set_apps(self, test_app_1, test_app_2):
+    def set_apps(self, test_app_1, test_app_2, test_app_3):
         self._test_app1 = test_app_1
         self._test_app2 = test_app_2
+        self._test_app3 = test_app_3
 
     def _set_command(self, cmd_split):
         self._cmd = cmd_split[0].upper()
@@ -122,6 +126,7 @@ class SSDTestShell:
             print(self._logic.help())
             print(self._test_app1.help())
             print(self._test_app2.help())
+            print(self._test_app3.help())
             print(HELP_POSTFIX)
         elif self._cmd == 'WRITE':
             self._logic.write(self._params[0], self._params[1])
@@ -135,6 +140,8 @@ class SSDTestShell:
             self._test_app1.run(self._logic)
         elif self._cmd == 'TESTAPP2':
             self._test_app2.run(self._logic)
+        elif self._cmd == 'TESTAPP3':
+            self._test_app3.run(self._logic)
         elif self._cmd == 'ERASE':
             self._logic.erase(self._params[0], self._params[1])
         elif self._cmd == 'ERASE_RANGE':
@@ -162,6 +169,8 @@ class SSDTestShell:
                 self._test_app1.run(self._logic)
             elif self._cmd == 'TESTAPP2':
                 self._test_app2.run(self._logic)
+            elif self._cmd == 'TESTAPP3':
+                self._test_app3.run(self._logic)
             else:
                 return -1
 
@@ -203,7 +212,8 @@ def main(sys_argv: List[str]):
 
     test_app1 = TestApp1()
     test_app2 = TestApp2()
-    shell.set_apps(test_app1, test_app2)
+    test_app3 = TestApp3()
+    shell.set_apps(test_app1, test_app2, test_app3)
 
     if len(sys_argv) > 1:
         shell.start_runner(sys_argv[1])
