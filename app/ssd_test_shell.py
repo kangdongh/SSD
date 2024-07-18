@@ -3,229 +3,58 @@ import sys
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import textwrap
+from app.return_code import ReturnCode
+from app.command import command_factory
+from app.scripts.runner import ScriptsRunner
+from app.shell_api import ShellAPI
+
 from typing import List
-
-from app.basic_logic import BasicLogic
-from app.system_call_handler import SystemCallHandler
-from app.test_app.test_app_1 import TestApp1
-from app.test_app.test_app_2 import TestApp2
-from app.test_app.test_app_3 import TestApp3
-from app.test_app.test_app_interface import ITestApp
-
-HELP_PREFIX = textwrap.dedent("""
-**********************************************************
-********************* COMMAND HELP ***********************
-**********************************************************
-""").strip()
-
-HELP_POSTFIX = textwrap.dedent("""
-*********************************************************
-""").strip()
-
-
-class CommandValidator:
-    COMMAND_LIST = ['READ', 'WRITE', 'EXIT', 'HELP', 'FULLREAD', 'FULLWRITE', 'ERASE', 'ERASE_RANGE', 'FLUSH']
-    TESTAPP_LIST = ['TESTAPP1', 'TESTAPP2', 'TESTAPP3']
-
-    def _get_integer(self, value):
-        try:
-            return int(value)
-        except ValueError:
-            return -1
-
-    def _get_hex(self, value):
-        try:
-            return int(value, 16)
-        except ValueError:
-            return -1
-
-    def is_valid_command(self, cmd):
-        cmd_split = cmd.split(" ")
-        cmd_split[0] = cmd_split[0].upper()
-        return (self._is_valid_cmd_length(cmd_split) and
-                self._is_valid_cmd(cmd_split[0]) and
-                self._is_valid_address(cmd_split) and
-                self._is_valid_value(cmd_split))
-
-    def _is_valid_cmd_length(self, cmds):
-        if len(cmds) == 0:
-            return False
-        if cmds[0] in ['EXIT', 'HELP', 'FULLREAD', 'FLUSH'] + self.TESTAPP_LIST and len(cmds) != 1:
-            return False
-        if cmds[0] in ['READ', 'FULLWRITE'] and len(cmds) != 2:
-            return False
-        if cmds[0] in ['WRITE', 'ERASE', 'ERASE_RANGE'] and len(cmds) != 3:
-            return False
-        return True
-
-    def _is_valid_cmd(self, cmd):
-        return cmd in self.COMMAND_LIST or cmd in self.TESTAPP_LIST
-
-    def _is_valid_address(self, cmd):
-        if cmd[0] not in ['WRITE', 'READ', 'ERASE', 'ERASE_RANGE']:
-            return True
-        if cmd[0] == 'ERASE':
-            address = self._get_integer(cmd[1])
-            size = self._get_integer(cmd[2])
-            return 0 <= address <= 99 and address + size <= 100 and size > 0
-        if cmd[0] == 'ERASE_RANGE':
-            start_address = self._get_integer(cmd[1])
-            end_address = self._get_integer(cmd[2])
-            return 0 <= start_address <= 99 and 0 <= end_address <= 100 and start_address < end_address
-
-        address = self._get_integer(cmd[1])
-        return 0 <= address <= 99
-
-    def _is_valid_value(self, cmd):
-        bytes = None
-        if cmd[0] == 'WRITE':
-            bytes = cmd[2]
-        elif cmd[0] == 'FULLWRITE':
-            bytes = cmd[1]
-        else:
-            return True
-        if len(bytes) != 10:
-            return False
-        if bytes[:2] != '0x':
-            return False
-        return self._get_hex(bytes[2:]) >= 0
 
 
 class SSDTestShell:
     INVALID_CMD = "INVALID COMMAND"
-    _logic: BasicLogic
-    _test_app1: ITestApp
-    _test_app2: ITestApp
-    _test_app3: ITestApp
 
-    def __init__(self, basic_logic: BasicLogic, validator: CommandValidator, test_app1=None, test_app2=None,
-                 test_app3=None):
-        self._logic = basic_logic
-        self._validator = validator
-        self._test_app1 = test_app1
-        self._test_app2 = test_app2
-        self._test_app3 = test_app3
-        self._cmd = None
-        self._params = None
+    def __init__(self, api: ShellAPI):
+        self.api = api
 
-    def set_apps(self, test_app_1, test_app_2, test_app_3):
-        self._test_app1 = test_app_1
-        self._test_app2 = test_app_2
-        self._test_app3 = test_app_3
-
-    def _set_command(self, cmd_split):
-        self._cmd = cmd_split[0].upper()
-        self._params = cmd_split[1:] if len(cmd_split) > 1 else None
-
-    def run(self, cmd) -> int:
-        self._set_command(cmd.split(" "))
-        if self._cmd == 'EXIT':
-            return -1
-        if self._cmd == 'HELP':
-            print(HELP_PREFIX)
-            print(self._logic.help())
-            print(self._test_app1.help())
-            print(self._test_app2.help())
-            print(self._test_app3.help())
-            print(HELP_POSTFIX)
-        elif self._cmd == 'FLUSH':
-            self._logic.flush()
-        elif self._cmd == 'WRITE':
-            self._logic.write(self._params[0], self._params[1])
-        elif self._cmd == 'READ':
-            print(self._logic.read(self._params[0]))
-        elif self._cmd == 'FULLREAD':
-            print(self._logic.full_read())
-        elif self._cmd == 'FULLWRITE':
-            self._logic.full_write(self._params[0])
-        elif self._cmd == 'TESTAPP1':
-            self._test_app1.run(self._logic)
-        elif self._cmd == 'TESTAPP2':
-            self._test_app2.run(self._logic)
-        elif self._cmd == 'TESTAPP3':
-            self._test_app3.run(self._logic)
-        elif self._cmd == 'ERASE':
-            self._logic.erase(self._params[0], self._params[1])
-        elif self._cmd == 'ERASE_RANGE':
-            self._logic.erase_range(self._params[0], self._params[1])
-
-        return 0
+    def run(self, shell_cmd: str) -> ReturnCode:
+        shell_cmd = shell_cmd.strip()
+        if len(shell_cmd) == 0:
+            return ReturnCode.FAILURE
+        shell_cmd = shell_cmd.split(' ')
+        try:
+            command = command_factory(shell_cmd)
+        except ValueError:
+            return ReturnCode.FAILURE
+        return command.safe_run(self.api)
 
     def start_progress(self):
         while True:
             try:
                 inp = input()
-                if not self._validator.is_valid_command(inp):
-                    print(self.INVALID_CMD)
-                    continue
-                if self.run(inp) == -1:
-                    break
-            except Exception as e:
-                print(str(e))
-
-
-class SSDTestRunner:
-    _logic: BasicLogic
-
-    def __init__(self, basic_logic: BasicLogic):
-        self._logic = basic_logic
-        self._test_apps = {}
-
-    def set_test_apps(self, *test_apps):
-        for i in range(len(test_apps)):
-            key = "TESTAPP" + str(i + 1)
-            self._test_apps[key] = test_apps[i]
-
-    def run_test_app(self, cmd) -> int:
-        try:
-            self._test_apps.get(cmd).run(self._logic)
-
-            return 0
-        except Exception as e:
-            return -1
-        except RuntimeError as e:
-            return -1
+            except Exception:
+                print("Error occurs while processing stdin. Exit")
+                break
+            return_code = self.run(inp)
+            if return_code == return_code.FAILURE:
+                print(self.INVALID_CMD)
+            if return_code == return_code.EXIT:
+                break
 
     def start_runner(self, runner_file_path):
         runner_file_path = os.path.abspath(runner_file_path)
-
         with open(runner_file_path, 'r') as file:
-            lines = file.readlines()
-
-            for line in lines:
-                cmd = line.rstrip()
-                print(f'{cmd} --- Run ...', end=' ', flush=True)
-
-                if cmd not in self._test_apps.keys():
-                    print(f'Fail!')
-                    break
-
-                if self.run_test_app(cmd) == -1:
-                    print(f'Fail!')
-                    break
-
-                print(f'Pass')
+            scripts = [l.strip() for l in file.readlines()]
+            runner = ScriptsRunner(scripts)
+            runner.run(self.api)
 
 
 def main(sys_argv: List[str]):
-    current_dir_abspath = os.path.dirname(os.path.abspath(__file__))
-    ssd_path = os.path.join(current_dir_abspath, '../hardware/ssd.py')
-    result_file_path = os.path.join(current_dir_abspath, '../hardware/result.txt')
-    system_call_handler = SystemCallHandler(ssd_path, result_file_path)
-
-    basic_logic = BasicLogic(system_call_handler)
-    validator = CommandValidator()
-
+    shell_api = ShellAPI()
+    shell = SSDTestShell(shell_api)
     if len(sys_argv) > 1:
-        runner = SSDTestRunner(basic_logic)
-        runner.set_test_apps(TestApp1(), TestApp2(), TestApp3())
-
-        runner.start_runner(sys_argv[1])
+        shell.start_runner(sys_argv[1])
     else:
-        shell = SSDTestShell(basic_logic, validator)
-        shell.set_apps(TestApp1(), TestApp2(), TestApp3())
-
         shell.start_progress()
 
 
