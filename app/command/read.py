@@ -24,3 +24,6 @@ class ReadCommand(ICommand):
     @classmethod
     def description(cls):
         return "Read value from SSD / usage: read <LBA>"
+
+    def __repr__(self):
+        return super().__repr__() + f"[LBA = {self._lba}]"

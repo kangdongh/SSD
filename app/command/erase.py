@@ -33,3 +33,6 @@ class EraseCommand(ICommand):
     @classmethod
     def description(cls):
         return "Erase value of SIZE from LBA on SSD / usage : erase <LBA> <SIZE>"
+
+    def __repr__(self):
+        return super().__repr__() + f"[LBA = {self._lba}, size={self._size}]"

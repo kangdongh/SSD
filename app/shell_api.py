@@ -2,6 +2,7 @@ from typing import List, Optional
 
 from app.input_checker import check_valid_address_int, check_valid_value
 from app.system_call_handler import SystemCallHandler
+from customlogger.logger import CommandLogger
 
 
 class ShellAPI:
@@ -10,18 +11,22 @@ class ShellAPI:
     def __init__(self, system_call_handler: Optional[SystemCallHandler] = None):
         self._system_call_handler = \
             system_call_handler if system_call_handler is not None else SystemCallHandler()
+        self._logger = CommandLogger().get_logger()
 
     def read(self, lba: int):
+        self._logger.debug(f"API.read call with {lba}")
         check_valid_address_int(lba)
         self._system_call(['R', str(lba)])
         return self._read_result()
 
     def write(self, lba: int, value: str):
+        self._logger.debug(f"API.write call with {lba}, {value}")
         check_valid_address_int(lba)
         check_valid_value(value)
         self._system_call(['W', str(lba), value])
 
     def erase(self, start_lba: int, size: int):
+        self._logger.debug(f"API.read call with {start_lba}, {size}")
         check_valid_address_int(start_lba)
         check_valid_address_int(start_lba + size - 1)
         while size > 0:
@@ -31,6 +36,7 @@ class ShellAPI:
             start_lba += erase_size
 
     def flush(self):
+        self._logger.debug("API.flush call")
         self._system_call(['F'])
 
     def get_system_env(self):

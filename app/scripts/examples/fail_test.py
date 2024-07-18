@@ -1,11 +1,12 @@
-def fail_test():
+import sys
+
+from app.scripts.script_utils import run_script
+
+
+def fail_test(api):
     raise ValueError(f"This test must fail")
 
 
 if __name__ == '__main__':
-    try:
-        fail_test()
-    except Exception:
-        print("FAIL")
-        exit(-1)
-    print("PASS")
+    ret = run_script(fail_test, sys.argv)
+    exit(ret)

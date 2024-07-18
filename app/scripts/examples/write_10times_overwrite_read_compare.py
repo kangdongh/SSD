@@ -1,7 +1,7 @@
 import sys
 
+from app.scripts.script_utils import run_script
 from app.shell_api import ShellAPI
-from app.system_call_handler import SystemCallHandler
 
 FIRST_WRITE_VALUE = '0xAAAABBBB'
 OVERWRITE_VALUE = '0x12345678'
@@ -24,13 +24,5 @@ def write_10times_overwrite_read_compare(api: ShellAPI):
 
 
 if __name__ == '__main__':
-    system_call_handler = None
-    if len(sys.argv) == 3:
-        print("Initialize system call with given args")
-        system_call_handler = SystemCallHandler(sys.argv[1], sys.argv[2])
-    try:
-        write_10times_overwrite_read_compare(ShellAPI(system_call_handler))
-    except Exception:
-        print("FAIL")
-        exit(-1)
-    print("PASS")
+    ret = run_script(write_10times_overwrite_read_compare, sys.argv)
+    exit(ret)
