@@ -2,7 +2,6 @@ import sys
 
 from app.scripts.script_utils import run_script
 from app.shell_api import ShellAPI
-from customlogger.logger import CommandLogger
 
 FIRST_WRITE_VALUE = '0xAAAABBBB'
 OVERWRITE_VALUE = '0x12345678'
@@ -10,8 +9,6 @@ PREDEFINED_LBA_HEAD = 0
 PREDEFINED_LBA_TAIL = 6
 PREDEFINED_LBA_RANGE = range(PREDEFINED_LBA_HEAD, PREDEFINED_LBA_TAIL)
 DUPL_WRITE_COUNT = 10
-
-logger = CommandLogger().get_logger()
 
 
 def write_10times_overwrite_read_compare(api: ShellAPI):
