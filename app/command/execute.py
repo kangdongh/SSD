@@ -2,7 +2,7 @@ import os.path
 from typing import List
 
 from app.command.interface import ICommand
-from app.scripts.script_path_utils import script_name_to_path
+from app.scripts.script_utils import script_name_to_path
 from app.shell_api import ShellAPI
 from app.subprocess_wrapper import subprocess_run
 
