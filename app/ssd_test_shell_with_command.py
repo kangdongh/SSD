@@ -41,7 +41,11 @@ class SSDTestShellNew:
 
     def start_progress(self):
         while True:
-            inp = input()
+            try:
+                inp = input()
+            except Exception:
+                print("Error occurs while processing stdin. Exit")
+                break
             return_code = self.run(inp)
             if return_code == return_code.FAILURE:
                 print(self.INVALID_CMD)
