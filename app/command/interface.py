@@ -20,3 +20,7 @@ class ICommand(ABC):
     @abstractmethod
     def run(self, api: ShellAPI) -> Optional[ReturnCode]:
         pass
+
+    @classmethod
+    def description(cls):
+        return ''

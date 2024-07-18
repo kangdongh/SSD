@@ -18,3 +18,7 @@ class FullWriteCommand(ICommand):
     def run(self, api: ShellAPI):
         for lba in range(100):
             api.write(lba, self._value)
+
+    @classmethod
+    def description(cls):
+        return "Write value at all LBAs / usage: fullwrite <VALUE>"

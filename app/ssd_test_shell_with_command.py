@@ -8,18 +8,7 @@ from app.command import command_factory
 from app.scripts_runner import ScriptsRunner
 from app.shell_api import ShellAPI
 
-import textwrap
 from typing import List
-
-HELP_PREFIX = textwrap.dedent("""
-**********************************************************
-********************* COMMAND HELP ***********************
-**********************************************************
-""").strip()
-
-HELP_POSTFIX = textwrap.dedent("""
-*********************************************************
-""").strip()
 
 
 class SSDTestShellNew:

@@ -13,3 +13,7 @@ class FullReadCommand(ICommand):
     def run(self, api: ShellAPI):
         for lba in range(100):
             print(api.read(lba))
+
+    @classmethod
+    def description(cls):
+        return "Read all LBAs / usage: fullread"

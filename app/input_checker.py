@@ -28,12 +28,24 @@ def check_valid_value(value: str):
         raise ValueError(f"Value {value} is not a hexadecimal value")
 
 
-SCRIPT_DIR_PATH = os.path.join(dirname(dirname(abspath(__file__))), "scripts")
+_script_dir_path = os.path.join(dirname(dirname(abspath(__file__))), "scripts")
 
 
 def is_script_name(name: str):
-    return os.path.exists(to_script_path(name))
+    return os.path.exists(script_name_to_path(name))
 
 
-def to_script_path(name: str):
-    return os.path.join(SCRIPT_DIR_PATH, name + '.py')
+def script_name_to_path(name: str):
+    return os.path.join(_script_dir_path, name + '.py')
+
+
+def get_script_dir_path():
+    return _script_dir_path
+
+
+def set_script_dir_path(dir_path: str):
+    if os.path.isdir(dir_path):
+        global _script_dir_path
+        _script_dir_path = dir_path
+    raise ValueError()
+

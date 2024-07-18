@@ -24,3 +24,7 @@ class WriteCommand(ICommand):
 
     def run(self, api: ShellAPI):
         api.write(self._lba, self._value)
+
+    @classmethod
+    def description(cls):
+        return "Write value to SSD / usage: write <LBA> <VALUE>"

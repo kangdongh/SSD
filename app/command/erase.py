@@ -29,3 +29,7 @@ class EraseCommand(ICommand):
 
     def run(self, api: ShellAPI):
         api.erase(self._lba, self._size)
+
+    @classmethod
+    def description(cls):
+        return "Erase value of SIZE from LBA on SSD / usage : erase <LBA> <SIZE>"

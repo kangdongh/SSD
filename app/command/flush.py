@@ -12,3 +12,7 @@ class FlushCommand(ICommand):
 
     def run(self, api: ShellAPI):
         api.flush()
+
+    @classmethod
+    def description(cls):
+        return "flush command buffer of SSD / usage: flush"

@@ -1,15 +1,14 @@
-from typing import List
-
 from app.command.interface import ICommand
 from app.shell_api import ShellAPI
 
 
 class HelpCommand(ICommand):
-
-    def __init__(self, cmd: List[str]):
-        if len(cmd) != 0:
-            raise ValueError()
+    def __init__(self, *args):
+        pass
 
     def run(self, api: ShellAPI):
-        # FIXME
-        print("help")
+        pass
+
+    @classmethod
+    def description(cls):
+        return "Help command"

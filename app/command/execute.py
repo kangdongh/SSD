@@ -2,7 +2,7 @@ import os.path
 from typing import List
 
 from app.command.interface import ICommand
-from app.input_checker import to_script_path
+from app.input_checker import script_name_to_path
 from app.shell_api import ShellAPI
 from app.subprocess_wrapper import subprocess_run
 
@@ -13,7 +13,7 @@ class ExecuteCommand(ICommand):
     def __init__(self, cmd: List[str]):
         if len(cmd) != 1:
             raise ValueError()
-        script_path = to_script_path(cmd[0])
+        script_path = script_name_to_path(cmd[0])
         if not os.path.exists(script_path):
             raise ValueError()
         self._script = script_path

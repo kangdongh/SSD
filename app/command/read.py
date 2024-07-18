@@ -20,3 +20,7 @@ class ReadCommand(ICommand):
 
     def run(self, api: ShellAPI):
         print(api.read(self._lba))
+
+    @classmethod
+    def description(cls):
+        return "Read value from SSD / usage: read <LBA>"

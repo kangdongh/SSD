@@ -13,3 +13,7 @@ class ExitCommand(ICommand):
 
     def run(self, api: ShellAPI):
         return ReturnCode.EXIT
+
+    @classmethod
+    def description(cls):
+        return "Exit program / usage: exit"

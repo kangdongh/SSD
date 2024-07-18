@@ -30,3 +30,7 @@ class EraseRangeCommand(ICommand):
 
     def run(self, api: ShellAPI):
         api.erase(self._lba, self._size)
+
+    @classmethod
+    def description(cls):
+        return "Erase value from startLBA to endLBA on SSD / usage : erase_range <Start LBA>  <End LBA>"

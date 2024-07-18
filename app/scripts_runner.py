@@ -2,7 +2,7 @@ import os.path
 from os.path import abspath, dirname
 from typing import List
 
-from app.input_checker import to_script_path
+from app.input_checker import script_name_to_path
 from app.shell_api import ShellAPI
 from app.subprocess_wrapper import subprocess_run_ignore_stdout
 
@@ -18,7 +18,7 @@ class ScriptsRunner:
     def run(self, api: ShellAPI):
         for script in self._scripts:
             print(f"Run {script} ... ", end=' ', flush=True)
-            script_path = to_script_path(script)
+            script_path = script_name_to_path(script)
             if not os.path.exists(script_path):
                 print("FAIL!")
                 return
