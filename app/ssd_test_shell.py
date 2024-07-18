@@ -170,7 +170,7 @@ class SSDTestRunner:
         self._logic = basic_logic
         self._test_apps = {}
 
-    def set_apps(self, *test_apps):
+    def set_test_apps(self, *test_apps):
         for i in range(len(test_apps)):
             key = "TESTAPP" + str(i + 1)
             self._test_apps[key] = test_apps[i]
@@ -199,8 +199,7 @@ class SSDTestRunner:
                     print(f'Fail!')
                     break
 
-                run_flag = self.run_test_app(cmd)
-                if run_flag == -1:
+                if self.run_test_app(cmd) == -1:
                     print(f'Fail!')
                     break
 
@@ -208,7 +207,6 @@ class SSDTestRunner:
 
 
 def main(sys_argv: List[str]):
-    import os.path
     current_dir_abspath = os.path.dirname(os.path.abspath(__file__))
     ssd_path = os.path.join(current_dir_abspath, '../hardware/ssd.py')
     result_file_path = os.path.join(current_dir_abspath, '../hardware/result.txt')
@@ -216,19 +214,16 @@ def main(sys_argv: List[str]):
 
     basic_logic = BasicLogic(system_call_handler)
     validator = CommandValidator()
-    shell = SSDTestShell(basic_logic, validator)
-
-    test_app1 = TestApp1()
-    test_app2 = TestApp2()
-    test_app3 = TestApp3()
-    shell.set_apps(test_app1, test_app2, test_app3)
 
     if len(sys_argv) > 1:
         runner = SSDTestRunner(basic_logic)
-        runner.set_apps(TestApp1(), TestApp2(), TestApp3())
+        runner.set_test_apps(TestApp1(), TestApp2(), TestApp3())
 
         runner.start_runner(sys_argv[1])
     else:
+        shell = SSDTestShell(basic_logic, validator)
+        shell.set_apps(TestApp1(), TestApp2(), TestApp3())
+
         shell.start_progress()
 
 
