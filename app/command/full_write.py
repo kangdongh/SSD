@@ -22,3 +22,6 @@ class FullWriteCommand(ICommand):
     @classmethod
     def description(cls):
         return "Write value at all LBAs / usage: fullwrite <VALUE>"
+
+    def __repr__(self):
+        return super().__repr__() + f"[Value = {self._value}]"

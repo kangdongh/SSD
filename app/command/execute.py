@@ -20,3 +20,6 @@ class ExecuteCommand(ICommand):
 
     def run(self, api: ShellAPI):
         subprocess_run(['python', self._script] + api.get_system_env())
+
+    def __repr__(self):
+        return super().__repr__() + f"[script: {self._script}]"

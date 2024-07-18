@@ -4,6 +4,7 @@ from typing import List
 from app.scripts.script_utils import script_name_to_path
 from app.shell_api import ShellAPI
 from app.subprocess_wrapper import subprocess_run_ignore_stdout
+from customlogger.logger import CommandLogger
 
 
 class ScriptsRunner:
@@ -11,6 +12,7 @@ class ScriptsRunner:
 
     def __init__(self, scripts: List[str]):
         self._scripts = scripts
+        self._logger = CommandLogger().get_logger()
 
     def run(self, api: ShellAPI):
         for script in self._scripts:

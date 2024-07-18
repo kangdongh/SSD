@@ -34,3 +34,6 @@ class EraseRangeCommand(ICommand):
     @classmethod
     def description(cls):
         return "Erase value from startLBA to endLBA on SSD / usage : erase_range <Start LBA>  <End LBA>"
+
+    def __repr__(self):
+        return super().__repr__() + f"[LBA = {self._lba}, size={self._size}]"

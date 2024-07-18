@@ -24,3 +24,6 @@ class ICommand(ABC):
     @classmethod
     def description(cls):
         return ''
+
+    def __repr__(self):
+        return self.__class__.__name__

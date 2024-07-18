@@ -28,3 +28,6 @@ class WriteCommand(ICommand):
     @classmethod
     def description(cls):
         return "Write value to SSD / usage: write <LBA> <VALUE>"
+
+    def __repr__(self):
+        return super().__repr__() + f"[LBA = {self._lba}, value={self._value}]"
