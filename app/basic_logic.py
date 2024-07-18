@@ -57,6 +57,9 @@ class BasicLogic:
         size = int(end_lba) - int(start_lba)
         self.erase(str(start_lba), str(size))
 
+    def flush(self) -> None:
+        self._system_call(['F'])
+
     def _system_call(self, system_call_arguments: List[str]):
         self._system_call_handler.run(system_call_arguments)
 
