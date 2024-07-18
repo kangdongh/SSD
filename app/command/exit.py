@@ -1,6 +1,7 @@
 from typing import List
 
 from app.command.interface import ICommand
+from app.return_code import ReturnCode
 from app.shell_api import ShellAPI
 
 
@@ -11,4 +12,4 @@ class ExitCommand(ICommand):
             raise ValueError()
 
     def run(self, api: ShellAPI):
-        exit(0)
+        return ReturnCode.EXIT

@@ -3,6 +3,7 @@ import sys
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+from app.return_code import ReturnCode
 from app.command import command_factory
 from app.scripts_runner import ScriptsRunner
 from app.shell_api import ShellAPI
@@ -27,23 +28,25 @@ class SSDTestShellNew:
     def __init__(self, api: ShellAPI):
         self.api = api
 
-    def run(self, shell_cmd: str) -> int:
+    def run(self, shell_cmd: str) -> ReturnCode:
         shell_cmd = shell_cmd.strip()
         if len(shell_cmd) == 0:
-            return -1
+            return ReturnCode.FAILURE
         shell_cmd = shell_cmd.split(' ')
         try:
             command = command_factory(shell_cmd)
-            command.run(self.api)
-        except ValueError as e:
-            return -1
-        return 0
+        except ValueError:
+            return ReturnCode.FAILURE
+        return command.safe_run(self.api)
 
     def start_progress(self):
         while True:
             inp = input()
-            if self.run(inp) == -1:
+            return_code = self.run(inp)
+            if return_code == return_code.FAILURE:
                 print(self.INVALID_CMD)
+            if return_code == return_code.EXIT:
+                break
 
     def start_runner(self, runner_file_path):
         runner_file_path = os.path.abspath(runner_file_path)
