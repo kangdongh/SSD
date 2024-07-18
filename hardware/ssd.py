@@ -221,10 +221,6 @@ class BufferOptimizer:
             if cmd is None:
                 continue
             self._optimize_if_prev_command_mergable(cmd, size - 1 - i, optimized_buffer)
-        for i in range(size - 1):
-            cmd = optimized_buffer[size - 1 - i]
-            if cmd is None:
-                continue
             self._optimize_if_prev_command_useless(cmd, size - 1 - i, optimized_buffer)
         optimized_buffer = [e for e in optimized_buffer if e is not None]
         return optimized_buffer
@@ -286,9 +282,7 @@ class BufferOptimizer:
         return cur_cmd_addr <= prev_cmd_addr < cur_cmd_addr + cur_erase_size
 
     def _check_erasable_when_both_erase(self, cur_cmd_addr, cur_erase_size, prev_cmd_addr, prev_erase_size):
-        cur_end_addr = cur_cmd_addr + cur_erase_size
-        prev_end_addr = prev_cmd_addr + prev_erase_size
-        return cur_cmd_addr <= prev_cmd_addr and prev_end_addr <= cur_end_addr
+        return cur_cmd_addr <= prev_cmd_addr <= (prev_cmd_addr + prev_erase_size) <= (cur_cmd_addr + cur_erase_size)
 
 
 def main():
