@@ -1,5 +1,6 @@
 import os
 import sys
+from time import sleep
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -174,7 +175,7 @@ class SSDTestShell:
             else:
                 return -1
 
-            print(f'{self._cmd} --- Run ... Pass')
+            print(f'Pass')
             return 0
         except Exception as e:
             return -1
@@ -189,13 +190,15 @@ class SSDTestShell:
 
             for line in lines:
                 line = line.rstrip()
+                print(f'{line} --- Run ...', end=' ', flush=True)
+
                 if not self._validator.is_valid_command(line):
-                    print(f'{line.split()[0]} --- Run ... Fail!')
+                    print(f'Fail!')
                     break
 
                 run_flag = self.run_test_app(line)
                 if run_flag == -1:
-                    print(f'{line.split()[0]} --- Run ... Fail!')
+                    print(f'Fail!')
                     break
 
 
