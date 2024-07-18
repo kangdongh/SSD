@@ -4,7 +4,7 @@ from threading import Lock
 
 from customlogger.custom_rotating_file_handler import CustomRotatingFileHandler
 
-LOG_DIR = '../logs'
+LOG_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../logs')
 LOG_FILE_NAME = 'latest.log'
 LOG_NAME = 'SSD'
 
