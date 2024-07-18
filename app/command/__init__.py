@@ -28,7 +28,7 @@ __COMMAND_DICT__ = {
     'FLUSH': FlushCommand,
 }
 
-from app.scripts.script_path_utils import is_script_name, get_script_dir_path
+from app.scripts.script_utils import is_script_name, get_script_dir_path
 
 
 def command_factory(cmd: List[str]) -> ICommand:
