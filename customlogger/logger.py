@@ -36,7 +36,3 @@ class CommandLogger:
 
     def get_logger(self) -> logging.Logger:
         return self.logger
-
-
-if __name__ == '__main__':
-    CommandLogger().get_logger().debug('test kkkkkk')
