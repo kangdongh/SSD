@@ -4,6 +4,8 @@ from datetime import datetime
 from fnmatch import fnmatch
 from logging import handlers
 
+LOG_FILE_NAME = 'latest.log'
+
 
 class CustomRotatingFileHandler(handlers.RotatingFileHandler):
     def __init__(self, alias, basedir, mode='a', max_bytes=10000, backup_count=1, encoding=None,
@@ -17,22 +19,23 @@ class CustomRotatingFileHandler(handlers.RotatingFileHandler):
                                               backup_count, encoding, delay)
 
         self.setFormatter(
-            logging.Formatter(fmt='[%(asctime)s.%(msecs)03d] %(funcName)-30s: %(message)s',
-                              datefmt='%y.%m.%d %H:%M:%S'))
+            logging.Formatter(
+                fmt='[%(asctime)s.%(msecs)03d] %(module)-15s %(funcName)-25s: %(message)s',
+                datefmt='%y.%m.%d %H:%M:%S'))
 
     def getBaseFilename(self):
-        return os.path.join(self.basedir_, "latest.log")
+        return os.path.join(self.basedir_, LOG_FILE_NAME)
 
     def doRollover(self):
         super().doRollover()
         os.chdir(self.basedir_)
-        if os.path.exists('latest.log.1'):
+        if os.path.exists(f'{LOG_FILE_NAME}.1'):
             self._do_zip()
-            os.rename('latest.log.1', self._get_rotating_filename())
+            os.rename(f'{LOG_FILE_NAME}.1', self._get_rotating_filename())
 
     def _get_rotating_filename(self) -> str:
         os.chdir(self.basedir_)
-        with open('latest.log.1', 'r') as f:
+        with open(f'{LOG_FILE_NAME}.1', 'r') as f:
             last_time = datetime.strptime((f.readlines()[-1][1:22]),
                                           '%y.%m.%d %H:%M:%S.%f').strftime(
                 '%y%m%d_%Hh_%Mm_%S.%f')[:-3]
