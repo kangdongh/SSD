@@ -12,16 +12,16 @@ DATA_FILE_DIR = os.path.join(CURRENT_FILE_PATH, 'nand.txt')
 RESULT_FILE_DIR = os.path.join(CURRENT_FILE_PATH, 'result.txt')
 BUFFER_FILE_DIR = os.path.join(CURRENT_FILE_PATH, 'buffer.txt')
 
+CMD_READ_TYPE = 'R'
+CMD_WRITE_TYPE = 'W'
+CMD_ERASE_TYPE = 'E'
+CMD_FLUSH_TYPE = 'F'
+
 
 class SSD(ISSD):
     CMD_FLUSH_LENGTH = 2
     CMD_READ_LENGTH = 3
     CMD_WRITE_LENGTH = CMD_ERASE_LENGTH = 4
-
-    CMD_READ_TYPE = 'R'
-    CMD_WRITE_TYPE = 'W'
-    CMD_ERASE_TYPE = 'E'
-    CMD_FLUSH_TYPE = 'F'
 
     INITIAL_DATA_VALUE = '0x00000000'
     DATA_LENGTH = 10
@@ -51,7 +51,7 @@ class SSD(ISSD):
 
         self._buffer_optimizer = BufferOptimizer()
 
-        self._command_list = [SSD.CMD_READ_TYPE, SSD.CMD_WRITE_TYPE, SSD.CMD_ERASE_TYPE, SSD.CMD_FLUSH_TYPE]
+        self._command_list = [CMD_READ_TYPE, CMD_WRITE_TYPE, CMD_ERASE_TYPE, CMD_FLUSH_TYPE]
 
         self.initialize()
 
@@ -97,12 +97,12 @@ class SSD(ISSD):
         if not self._is_valid_cmd(argv):
             raise Exception('INVALID COMMAND')
         cmd_type = argv[1]
-        if cmd_type == SSD.CMD_READ_TYPE:
+        if cmd_type == CMD_READ_TYPE:
             lba = int(argv[2])
             self._read(lba)
-        elif cmd_type == SSD.CMD_WRITE_TYPE or cmd_type == SSD.CMD_ERASE_TYPE:
+        elif cmd_type == CMD_WRITE_TYPE or cmd_type == CMD_ERASE_TYPE:
             self._edit_file(argv[1:])
-        elif cmd_type == SSD.CMD_FLUSH_TYPE:
+        elif cmd_type == CMD_FLUSH_TYPE:
             self._flush()
         else:
             raise Exception('INVALID COMMAND')
@@ -117,9 +117,9 @@ class SSD(ISSD):
         for command in self._buffer:
             command_type = command[0]
             address = int(command[1])
-            if command_type == SSD.CMD_WRITE_TYPE:
+            if command_type == CMD_WRITE_TYPE:
                 self._write(address, command[2])
-            elif command_type == SSD.CMD_ERASE_TYPE:
+            elif command_type == CMD_ERASE_TYPE:
                 self._erase(address, int(command[2]))
         self._buffer.clear()
 
@@ -136,9 +136,9 @@ class SSD(ISSD):
         for command in self._buffer:
             command_type = command[0]
             command_addr = int(command[1])
-            if command_type == SSD.CMD_WRITE_TYPE and command_addr == address:
+            if command_type == CMD_WRITE_TYPE and command_addr == address:
                 ret_val = [True, command[2]]
-            elif command_type == SSD.CMD_ERASE_TYPE:
+            elif command_type == CMD_ERASE_TYPE:
                 end_addr = command_addr + int(command[2])
                 if command_addr <= address < end_addr:
                     ret_val = [True, SSD.INITIAL_DATA_VALUE]
@@ -163,13 +163,13 @@ class SSD(ISSD):
         cmd_type = argv[1]
         if cmd_type not in self._command_list:
             return False
-        if cmd_type == SSD.CMD_FLUSH_TYPE and len(argv) != SSD.CMD_FLUSH_LENGTH:
+        if cmd_type == CMD_FLUSH_TYPE and len(argv) != SSD.CMD_FLUSH_LENGTH:
             return False
-        elif cmd_type == SSD.CMD_READ_TYPE and (len(argv) != SSD.CMD_READ_LENGTH or not argv[2].isdigit()):
+        elif cmd_type == CMD_READ_TYPE and (len(argv) != SSD.CMD_READ_LENGTH or not argv[2].isdigit()):
             return False
-        elif cmd_type == SSD.CMD_WRITE_TYPE and (len(argv) != SSD.CMD_WRITE_LENGTH or not argv[2].isdigit()):
+        elif cmd_type == CMD_WRITE_TYPE and (len(argv) != SSD.CMD_WRITE_LENGTH or not argv[2].isdigit()):
             return False
-        elif cmd_type == SSD.CMD_ERASE_TYPE and (
+        elif cmd_type == CMD_ERASE_TYPE and (
                 len(argv) != SSD.CMD_ERASE_LENGTH or not argv[2].isdigit() or not argv[3].isdigit()):
             return False
 
@@ -177,16 +177,16 @@ class SSD(ISSD):
 
     def _check_cmd_semantic(self, argv: List[str]):
         cmd_type = argv[1]
-        if cmd_type == SSD.CMD_FLUSH_TYPE:
+        if cmd_type == CMD_FLUSH_TYPE:
             return True
         lba = int(argv[2])
         if lba >= SSD.MAX_DATA_LEN:
             return False
-        if cmd_type == SSD.CMD_WRITE_TYPE:
+        if cmd_type == CMD_WRITE_TYPE:
             data = argv[3]
             if not self._is_valid_data(data):
                 return False
-        if cmd_type == SSD.CMD_ERASE_TYPE:
+        if cmd_type == CMD_ERASE_TYPE:
             size = int(argv[3])
             if not self._is_erasable(lba, size):
                 return False
@@ -212,9 +212,6 @@ class SSD(ISSD):
 
 
 class BufferOptimizer:
-    CMD_WRITE_TYPE = 'W'
-    CMD_ERASE_TYPE = 'E'
-
     def optimize_command_buffer(self, buffer: List[List[str]]):
         size = len(buffer)
         optimized_buffer = copy.copy(buffer)
@@ -222,36 +219,64 @@ class BufferOptimizer:
             cmd = optimized_buffer[size - 1 - i]
             if cmd is None:
                 continue
-            optimized_buffer = self._optimize_if_prev_command_useless(cmd, size - 1 - i, optimized_buffer)
+            self._optimize_if_prev_command_useless(cmd, size - 1 - i, optimized_buffer)
         optimized_buffer = [e for e in optimized_buffer if e is not None]
         return optimized_buffer
 
-    def _optimize_if_prev_command_useless(self, cur_cmd, cur_idx, current_buffer):
-        new_buffer = copy.copy(current_buffer)
-        if cur_cmd[0] == 'W':
-            cur_addr = int(cur_cmd[1])
-            for i in range(cur_idx):
-                prev_cmd = current_buffer[i]
-                if prev_cmd is None:
-                    continue
-                if prev_cmd[0] == 'W' and int(prev_cmd[1]) == cur_addr:
-                    new_buffer[i] = None
+    def _optimize_if_prev_command_useless(self, cur_cmd: List[str], cur_idx: int, command_buffer: List):
+        for i in range(cur_idx):
+            prev_cmd = command_buffer[i]
+            if prev_cmd is None:
+                continue
+            if self._check_erasable(cur_cmd, prev_cmd):
+                command_buffer[i] = None
 
-        elif cur_cmd[0] == 'E':
-            start_addr = int(cur_cmd[1])
-            end_addr = start_addr + int(cur_cmd[2])
-            for i in range(cur_idx):
-                prev_cmd = current_buffer[i]
-                if prev_cmd is None:
-                    continue
-                if prev_cmd[0] == 'W' and start_addr <= int(prev_cmd[1]) < end_addr:
-                    new_buffer[i] = None
-                elif prev_cmd[0] == 'E':
-                    prev_start_addr = int(prev_cmd[1])
-                    prev_end_addr = prev_start_addr + int(prev_cmd[2])
-                    if start_addr <= prev_start_addr and prev_end_addr <= end_addr:
-                        new_buffer[i] = None
-        return new_buffer
+    def _check_erasable(self, cur_cmd: List[str], prev_cmd: List[str]):
+        cur_cmd_type = cur_cmd[0]
+        cur_cmd_addr = int(cur_cmd[1])
+        prev_cmd_type = prev_cmd[0]
+        prev_cmd_addr = int(prev_cmd[1])
+        if cur_cmd_type == CMD_WRITE_TYPE and prev_cmd_type == CMD_WRITE_TYPE:
+            if self._check_erasable_when_both_write(cur_cmd_addr, prev_cmd_addr):
+                return True
+        elif cur_cmd_type == CMD_WRITE_TYPE and prev_cmd_type == CMD_ERASE_TYPE:
+            if self._check_erasable_when_cur_write_prev_erase(cur_cmd_addr, prev_cmd_addr, int(prev_cmd[2])):
+                return True
+        elif cur_cmd_type == CMD_ERASE_TYPE and prev_cmd_type == CMD_WRITE_TYPE:
+            if self._check_erasable_when_cur_erase_prev_write(cur_cmd_addr, int(cur_cmd[2]), prev_cmd_addr):
+                return True
+        elif cur_cmd_type == CMD_ERASE_TYPE and prev_cmd_type == CMD_ERASE_TYPE:
+            if self._check_erasable_when_both_erase(cur_cmd_addr, int(cur_cmd[2]), prev_cmd_addr, int(prev_cmd[2])):
+                return True
+        return False
+
+    def _check_erasable_when_both_write(self, cur_cmd_addr, prev_cmd_addr):
+        return prev_cmd_addr == cur_cmd_addr
+
+    def _check_erasable_when_cur_write_prev_erase(self, cur_cmd_addr, prev_cmd_addr, prev_erase_size):
+        return cur_cmd_addr <= prev_cmd_addr and prev_erase_size == 1
+
+    def _check_erasable_when_cur_erase_prev_write(self, cur_cmd_addr, cur_erase_size, prev_cmd_addr):
+        return cur_cmd_addr <= prev_cmd_addr < cur_cmd_addr + cur_erase_size
+
+    def _check_erasable_when_both_erase(self, cur_cmd_addr, cur_erase_size, prev_cmd_addr, prev_erase_size):
+        cur_end_addr = cur_cmd_addr + cur_erase_size
+        prev_end_addr = prev_cmd_addr + prev_erase_size
+        return cur_cmd_addr <= prev_cmd_addr and prev_end_addr <= cur_end_addr
+
+
+def test_main():
+    try:
+        ssd = SSD()
+        ssd.run(['ssd', 'W', '0', '0x00aa00bb'])
+        ssd.run(['ssd', 'W', '2', '0x00aa00bb'])
+        ssd.run(['ssd', 'W', '4', '0x00aa00bb'])
+        ssd.run(['ssd', 'W', '6', '0x00aa00bb'])
+        ssd.run(['ssd', 'W', '5', '0x00aa00bb'])
+        ssd.run(['ssd', 'W', '8', '0x00aa00bb'])
+        ssd.run(['ssd', 'E', '1', '3'])
+    except Exception as e:
+        print(e)
 
 
 def main():
@@ -266,3 +291,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+    # test_main()
