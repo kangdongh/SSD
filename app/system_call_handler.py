@@ -11,8 +11,8 @@ class SystemCallHandler:
     _result_file_path: str
 
     def __init__(self, ssd_path=PREDEFINED_SSD_PATH, result_file_path=PREDEFINED_RESULT_PATH):
-        self._ssd_path = ssd_path
-        self._result_file_path = result_file_path
+        self._ssd_path = os.path.abspath(ssd_path)
+        self._result_file_path = os.path.abspath(result_file_path)
 
     def run(self, system_call_arguments: List[str]):
         if not os.path.exists(self._ssd_path):
