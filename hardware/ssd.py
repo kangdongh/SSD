@@ -17,6 +17,7 @@ RESULT_FILE_DIR = os.path.join(CURRENT_FILE_PATH, 'result.txt')
 BUFFER_FILE_DIR = os.path.join(CURRENT_FILE_PATH, 'buffer.txt')
 
 logger = CommandLogger().get_logger()
+DEFAULT_SPACER = '               '
 
 
 class SSD(ISSD):
@@ -90,7 +91,7 @@ class SSD(ISSD):
 
     def run(self, argv: List[str]):
         if not self._is_valid_cmd(argv):
-            logger.debug('[ ERROR ] invalid input arguments')
+            logger.debug('[ ERROR ] invalid input arguments: ' + str(argv))
             raise Exception('INVALID COMMAND')
         logger.debug(f'[ START ] SSD: {self._create_log_message(argv)}')
         cmd_type = argv[1]
@@ -118,16 +119,16 @@ class SSD(ISSD):
 
     def _edit_data(self, argv: List[str]):
         if len(self._buffer) == MAX_BUFFER_LEN:
-            logger.debug(f'               buffer is full')
+            logger.debug(f'{DEFAULT_SPACER}buffer is full')
             self._flush()
-        logger.debug(f'               append command to buffer')
+        logger.debug(f'{DEFAULT_SPACER}append command to buffer')
         self._buffer.append(argv)
-        logger.debug(f'               optimizing buffer ...')
+        logger.debug(f'{DEFAULT_SPACER}optimizing buffer ...')
         self._buffer = self._buffer_optimizer.optimize_command_buffer(self._buffer)
-        logger.debug(f'               optimizing complete')
+        logger.debug(f'{DEFAULT_SPACER}optimizing complete')
 
     def _flush(self):
-        logger.debug(f'               flushing ...')
+        logger.debug(f'{DEFAULT_SPACER}flushing ...')
         for command in self._buffer:
             command_type = command[0]
             address = int(command[1])
@@ -136,21 +137,21 @@ class SSD(ISSD):
             elif command_type == CMD_ERASE_TYPE:
                 self._erase(address, int(command[2]))
         self._buffer.clear()
-        logger.debug(f'               flushing complete')
+        logger.debug(f'{DEFAULT_SPACER}flushing complete')
 
     def _read(self, address):
-        logger.debug(f'               read ...')
-        logger.debug(f'               searching in the buffer ...')
+        logger.debug(f'{DEFAULT_SPACER}read ...')
+        logger.debug(f'{DEFAULT_SPACER}searching in the buffer ...')
         buffer_result = self._search_buffer(address)
         if buffer_result[0]:
-            logger.debug(f'               success to find data in the buffer ...')
+            logger.debug(f'{DEFAULT_SPACER}success to find data in the buffer ...')
             read_value = buffer_result[1]
         else:
-            logger.debug(f'               fail to find data in the buffer ...')
-            logger.debug(f'               start to full read ...')
+            logger.debug(f'{DEFAULT_SPACER}fail to find data in the buffer ...')
+            logger.debug(f'{DEFAULT_SPACER}start to full read ...')
             read_value = self._data_reader.read(address)
         self._result_writer.write(0, 1, read_value)
-        logger.debug(f'               read complete')
+        logger.debug(f'{DEFAULT_SPACER}read complete')
 
     def _search_buffer(self, address):
         ret_val = [False, None]
@@ -166,14 +167,14 @@ class SSD(ISSD):
         return ret_val
 
     def _write(self, address, data):
-        logger.debug(f'               write ...')
+        logger.debug(f'{DEFAULT_SPACER}write ...')
         self._data_writer.write(address, 1, data)
-        logger.debug(f'               write complete')
+        logger.debug(f'{DEFAULT_SPACER}write complete')
 
     def _erase(self, address, size):
-        logger.debug(f'               erase ...')
+        logger.debug(f'{DEFAULT_SPACER}erase ...')
         self._data_writer.write(address, size, INITIAL_DATA_VALUE)
-        logger.debug(f'               erase complete')
+        logger.debug(f'{DEFAULT_SPACER}erase complete')
 
     def _is_valid_cmd(self, argv: List[str]):
         if not self._check_cmd_syntax(argv):
