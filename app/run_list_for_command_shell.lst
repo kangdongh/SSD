@@ -1,0 +1,4 @@
+fullwrite_erase_read_compare
+fullwrite_read_compare
+write_10times_overwrite_read_compare
+fail_test
