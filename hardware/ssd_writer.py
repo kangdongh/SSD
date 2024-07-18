@@ -1,8 +1,9 @@
 from hardware.ssd_writer_interface import ISSDWriter
+from hardware.ssd_common_data import MAX_DATA_LEN
 
 
 class SSDWriter(ISSDWriter):
-    def __init__(self, write_file_path: str, max_lba: int = 100):
+    def __init__(self, write_file_path: str, max_lba: int = MAX_DATA_LEN):
         self._write_file_path = write_file_path
         self._max_lba = max_lba
 
