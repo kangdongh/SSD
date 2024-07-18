@@ -1,19 +1,22 @@
 import sys
 
+from app.scripts.script_utils import run_script
 from app.shell_api import ShellAPI
-from app.system_call_handler import SystemCallHandler
+from customlogger.logger import CommandLogger
 
 FULL_WRITE_VALUE = '0x00000004'
 ERASE_VALUE = '0x00000000'
 
+logger = CommandLogger().get_logger()
+
 
 def fullwrite_erase_read_compare(api: ShellAPI):
-    print("full write...")
+    logger.info("full write...")
     for lba in range(100):
         api.write(lba, FULL_WRITE_VALUE)
-    print("partial erase...")
+    logger.info("partial erase...")
     api.erase(50, 45)
-    print("check...")
+    logger.info("check...")
     for lba in range(50):
         read_value = api.read(lba)
         if read_value != FULL_WRITE_VALUE:
@@ -29,13 +32,5 @@ def fullwrite_erase_read_compare(api: ShellAPI):
 
 
 if __name__ == '__main__':
-    system_call_handler = None
-    if len(sys.argv) == 3:
-        print("Initialize system call with given args")
-        system_call_handler = SystemCallHandler(sys.argv[1], sys.argv[2])
-    try:
-        fullwrite_erase_read_compare(ShellAPI(system_call_handler))
-    except Exception:
-        print("FAIL")
-        exit(-1)
-    print("PASS")
+    ret = run_script(fullwrite_erase_read_compare, sys.argv)
+    exit(ret)
