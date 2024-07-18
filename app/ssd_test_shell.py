@@ -25,7 +25,7 @@ HELP_POSTFIX = textwrap.dedent("""
 
 
 class CommandValidator:
-    COMMAND_LIST = ['READ', 'WRITE', 'EXIT', 'HELP', 'FULLREAD', 'FULLWRITE', 'ERASE', 'ERASE_RANGE']
+    COMMAND_LIST = ['READ', 'WRITE', 'EXIT', 'HELP', 'FULLREAD', 'FULLWRITE', 'ERASE', 'ERASE_RANGE', 'FLUSH']
     TESTAPP_LIST = ['TESTAPP1', 'TESTAPP2', 'TESTAPP3']
 
     def _get_integer(self, value):
@@ -51,7 +51,7 @@ class CommandValidator:
     def _is_valid_cmd_length(self, cmds):
         if len(cmds) == 0:
             return False
-        if cmds[0] in ['EXIT', 'HELP', 'FULLREAD'] + self.TESTAPP_LIST and len(cmds) != 1:
+        if cmds[0] in ['EXIT', 'HELP', 'FULLREAD', 'FLUSH'] + self.TESTAPP_LIST and len(cmds) != 1:
             return False
         if cmds[0] in ['READ', 'FULLWRITE'] and len(cmds) != 2:
             return False
@@ -129,6 +129,8 @@ class SSDTestShell:
             print(self._test_app2.help())
             print(self._test_app3.help())
             print(HELP_POSTFIX)
+        elif self._cmd == 'FLUSH':
+            self._logic.flush()
         elif self._cmd == 'WRITE':
             self._logic.write(self._params[0], self._params[1])
         elif self._cmd == 'READ':
