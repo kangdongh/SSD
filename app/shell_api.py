@@ -23,7 +23,7 @@ class ShellAPI:
 
     def erase(self, start_lba: int, size: int):
         check_valid_address_int(start_lba)
-        check_valid_address_int(start_lba + size)
+        check_valid_address_int(start_lba + size - 1)
         while size > 0:
             erase_size = min(size, 10)
             self._system_call(['E', str(start_lba), str(erase_size)])

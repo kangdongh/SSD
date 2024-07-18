@@ -25,7 +25,7 @@ class EraseRangeCommand(ICommand):
         size = lba_end - lba
         if size <= 0:
             raise ValueError()
-        check_valid_address_int(lba + size)
+        check_valid_address_int(lba + size - 1)
         self._size = size
 
     def run(self, api: ShellAPI):
