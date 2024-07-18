@@ -1,7 +1,5 @@
 import logging
 import os
-import sys
-from datetime import datetime
 from threading import Lock
 
 from customlogger.custom_rotating_file_handler import CustomRotatingFileHandler
@@ -16,9 +14,9 @@ class CommandLogger:
     _lock = Lock()
 
     def __new__(cls, *args, **kwargs):
-        with cls._lock:
-            if cls._instance is None:
-                cls._instance = super(CommandLogger, cls).__new__(cls)
+        if cls._instance is None:
+            with cls._lock:
+                cls._instance = super().__new__(cls)
                 cls._instance._initialized = False
         return cls._instance
 
@@ -28,11 +26,13 @@ class CommandLogger:
         if not os.path.exists(LOG_DIR):
             os.makedirs(LOG_DIR)
         self.logger = None
+        self.set_logger()
         self._initialized = True
 
-    def get_logger(self) -> logging.Logger:
+    def set_logger(self):
         self.logger = logging.getLogger(LOG_NAME)
         self.logger.setLevel(logging.DEBUG)
         self.logger.addHandler(CustomRotatingFileHandler(alias="alias", basedir=LOG_DIR))
 
+    def get_logger(self) -> logging.Logger:
         return self.logger
