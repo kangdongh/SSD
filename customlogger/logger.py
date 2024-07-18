@@ -4,6 +4,9 @@ import sys
 from datetime import datetime
 from threading import Lock
 
+LOG_DIR = '../logs'
+LOG_FILE_NAME = 'latest.log'
+
 
 class CloseFileHandler(logging.FileHandler):
     def emit(self, record):
@@ -25,10 +28,9 @@ class CommandLogger:
     def __init__(self):
         if self._initialized:
             return
-        self.log_dir = 'logs'
-        self.log_file = os.path.join(self.log_dir, 'latest.txt')
-        if not os.path.exists(self.log_dir):
-            os.makedirs(self.log_dir)
+        self.log_file = os.path.join(LOG_DIR, LOG_FILE_NAME)
+        if not os.path.exists(LOG_DIR):
+            os.makedirs(LOG_DIR)
         self.logger = None
         self._initialized = True
 
@@ -65,14 +67,14 @@ class CommandLogger:
                 last_log_time = datetime.strptime(last_log_time, '%Y-%m-%d %H:%M:%S,%f')
 
             now = last_log_time.strftime("%Y%m%d_%H%M%S")
-            new_log_file = os.path.join(self.log_dir, f'{now}.txt')
+            new_log_file = os.path.join(LOG_DIR, f'{now}.log')
             self._close_handlers(logger)
             os.rename(self.log_file, new_log_file)
 
-            previous_logs = [f for f in os.listdir(self.log_dir) if
-                             f.endswith('.txt') and f != 'latest.txt' and f != f'{now}.txt']
+            previous_logs = [f for f in os.listdir(LOG_DIR) if
+                             f.endswith('.log') and f != LOG_FILE_NAME and f != f'{now}.log']
             for old_log in previous_logs:
-                old_log_path = os.path.join(self.log_dir, old_log)
+                old_log_path = os.path.join(LOG_DIR, old_log)
                 zip_filename = os.path.splitext(old_log_path)[0] + '.zip'
                 os.rename(old_log_path, zip_filename)
 
@@ -83,3 +85,8 @@ class CommandLogger:
         self.logger = self._setup_logger(name)
         self._rotate_log(self.logger)
         return self.logger
+
+
+if __name__ == '__main__':
+    logger = CommandLogger()
+    logger.get_logger().info('test')
