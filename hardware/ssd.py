@@ -37,8 +37,6 @@ class SSD(ISSD):
         self._result_writer = SSDWriter(result_file_dir, max_lba=MAX_RESULT_LEN)
 
         self._buffer_file_dir = buffer_file_dir
-        self._buffer_reader = SSDReader(buffer_file_dir)
-        self._buffer_writer = SSDWriter(buffer_file_dir, max_lba=MAX_BUFFER_LEN)
         self._buffer = []
 
         self._buffer_optimizer = BufferOptimizer()
@@ -82,7 +80,7 @@ class SSD(ISSD):
             self._load_buffer_file()
         else:
             with open(self._buffer_file_dir, 'w') as buffer_file:
-                for _ in range(MAX_DATA_LEN):
+                for _ in range(MAX_BUFFER_LEN):
                     buffer_file.write('None\n')
 
     def run(self, argv: List[str]):
