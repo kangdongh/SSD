@@ -3,9 +3,11 @@ from unittest import TestCase
 
 from hardware.ssd import SSD
 
-TEST_DATA_FILE_PATH = './test_nand.txt'
-TEST_RESULT_FILE_PATH = './test_result.txt'
-TEST_BUFFER_FILE_PATH = './test_buffer.txt'
+CURRENT_FILE_PATH = os.path.dirname(os.path.abspath(__file__))
+TEST_DATA_FILE_PATH = os.path.join(CURRENT_FILE_PATH, 'test_nand.txt')
+TEST_RESULT_FILE_PATH = os.path.join(CURRENT_FILE_PATH, 'test_result.txt')
+TEST_BUFFER_FILE_PATH = os.path.join(CURRENT_FILE_PATH, 'test_buffer.txt')
+
 INITIAL_DATA_VALUE = '0x00000000'
 
 
