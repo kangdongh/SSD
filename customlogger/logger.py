@@ -1,11 +1,11 @@
 import logging
 import os
-import sys
 from datetime import datetime
 from threading import Lock
 
-LOG_DIR = '../logs'
+LOG_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../logs')
 LOG_FILE_NAME = 'latest.log'
+LOG_NAME = 'SSD'
 
 
 class CloseFileHandler(logging.FileHandler):
@@ -19,8 +19,8 @@ class CommandLogger:
     _lock = Lock()
 
     def __new__(cls, *args, **kwargs):
-        with cls._lock:
-            if cls._instance is None:
+        if cls._instance is None:
+            with cls._lock:
                 cls._instance = super(CommandLogger, cls).__new__(cls)
                 cls._instance._initialized = False
         return cls._instance
@@ -28,9 +28,9 @@ class CommandLogger:
     def __init__(self):
         if self._initialized:
             return
+
+        os.makedirs(LOG_DIR, exist_ok=True)
         self.log_file = os.path.join(LOG_DIR, LOG_FILE_NAME)
-        if not os.path.exists(LOG_DIR):
-            os.makedirs(LOG_DIR)
         self.logger = None
         self._initialized = True
 
@@ -41,15 +41,12 @@ class CommandLogger:
         if not logger.handlers:
             file_handler = CloseFileHandler(self.log_file)
             file_handler.setLevel(logging.DEBUG)
-            formatter = logging.Formatter('%(asctime)s - %(name)s - %(funcName)s - %(message)s')
+            formatter = logging.Formatter(
+                fmt='[%(asctime)s.%(msecs)03d] %(module)-15s %(funcName)-25s: %(message)s',
+                datefmt='%y.%m.%d %H:%M:%S')
             file_handler.setFormatter(formatter)
 
-            stream_handler = logging.StreamHandler(sys.stdout)
-            stream_handler.setLevel(logging.DEBUG)
-            stream_handler.setFormatter(formatter)
-
             logger.addHandler(file_handler)
-            logger.addHandler(stream_handler)
 
         return logger
 
