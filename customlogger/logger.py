@@ -6,6 +6,7 @@ from threading import Lock
 LOG_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../logs')
 LOG_FILE_NAME = 'latest.log'
 LOG_NAME = 'SSD'
+LOG_SIZE = 10 * 1024
 
 
 class CloseFileHandler(logging.FileHandler):
@@ -56,29 +57,30 @@ class CommandLogger:
             logger.removeHandler(handler)
 
     def _rotate_log(self, logger):
-        if os.path.getsize(self.log_file) > 10240:  # 10KB
-            with open(self.log_file, 'r') as f:
-                lines = f.readlines()
-                last_log = lines[-1]
-                last_log_time = last_log.split(' - ')[0]
-                last_log_time = datetime.strptime(last_log_time, '%Y-%m-%d %H:%M:%S,%f')
-
-            now = last_log_time.strftime("%Y%m%d_%H%M%S")
-            new_log_file = os.path.join(LOG_DIR, f'{now}.log')
+        if os.path.getsize(self.log_file) > LOG_SIZE:
+            self._do_zip()
+            new_log_file = self._rename_prev_log()
             self._close_handlers(logger)
-            os.rename(self.log_file, new_log_file)
-
-            previous_logs = [f for f in os.listdir(LOG_DIR) if
-                             f.endswith('.log') and f != LOG_FILE_NAME and f != f'{now}.log']
-            for old_log in previous_logs:
-                old_log_path = os.path.join(LOG_DIR, old_log)
-                zip_filename = os.path.splitext(old_log_path)[0] + '.zip'
-                os.rename(old_log_path, zip_filename)
+            os.rename(self.log_file, os.path.join(LOG_DIR, new_log_file))
 
             self.logger = self._setup_logger(logger.name)
 
-    def get_logger(self, cmd_name=None, class_name=None, func_name=None):
-        name = class_name if class_name else 'default'
-        self.logger = self._setup_logger(name)
+    def _rename_prev_log(self):
+        os.chdir(LOG_DIR)
+        with open(self.log_file, 'r') as f:
+            last_time = datetime.strptime((f.readlines()[-1][1:22]),
+                                          '%y.%m.%d %H:%M:%S.%f').strftime(
+                '%y%m%d_%Hh_%Mm_%S.%f')[:-3]
+            new_log_file = f'until_{last_time}s.log'
+        return new_log_file
+
+    def _do_zip(self) -> None:
+        os.chdir(LOG_DIR)
+        log_files = [f for f in os.listdir(LOG_DIR) if f.endswith('.log') and f.startswith('until')]
+        for file in log_files:
+            os.rename(file, file.replace('.log', '.zip'))
+
+    def get_logger(self):
+        self.logger = self._setup_logger(LOG_NAME)
         self._rotate_log(self.logger)
         return self.logger
