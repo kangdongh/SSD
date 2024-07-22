@@ -12,11 +12,14 @@ DUPL_WRITE_COUNT = 10
 
 
 def write_10times_overwrite_read_compare(api: ShellAPI):
+    print("dupl write...")
     for _ in range(DUPL_WRITE_COUNT):
         for lba in PREDEFINED_LBA_RANGE:
             api.write(lba, FIRST_WRITE_VALUE)
+    print("overwrite...")
     for lba in PREDEFINED_LBA_RANGE:
         api.write(lba, OVERWRITE_VALUE)
+    print("read and compare...")
     for lba in PREDEFINED_LBA_RANGE:
         read_value = api.read(lba)
         if read_value != OVERWRITE_VALUE:

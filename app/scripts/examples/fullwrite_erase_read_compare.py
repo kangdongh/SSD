@@ -11,12 +11,12 @@ logger = CommandLogger().get_logger()
 
 
 def fullwrite_erase_read_compare(api: ShellAPI):
-    logger.info("full write...")
+    print("full write...")
     for lba in range(100):
         api.write(lba, FULL_WRITE_VALUE)
-    logger.info("partial erase...")
+    print("partial erase...")
     api.erase(50, 45)
-    logger.info("check...")
+    print("check...")
     for lba in range(50):
         read_value = api.read(lba)
         if read_value != FULL_WRITE_VALUE:
