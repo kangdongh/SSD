@@ -58,12 +58,14 @@ class CommandLogger:
 
     def _rotate_log(self, logger):
         if os.path.getsize(self.log_file) > LOG_MAX_SIZE:
-            new_log_file = self._rename_current_log()
-            self._zip_old_logs()
-            self._close_handlers(logger)
-            os.rename(self.log_file, os.path.join(LOG_DIR, new_log_file))
-
-            self.logger = self._setup_logger()
+            try:
+                new_log_file = self._rename_current_log()
+                self._zip_old_logs()
+                self._close_handlers(logger)
+                os.rename(self.log_file, os.path.join(LOG_DIR, new_log_file))
+                self.logger = self._setup_logger()
+            except PermissionError as e:
+                self.logger = self._setup_logger()
 
     def _rename_current_log(self):
         with open(self.log_file, 'r') as f:
@@ -76,7 +78,8 @@ class CommandLogger:
     def _zip_old_logs(self) -> None:
         for file in os.listdir(LOG_DIR):
             if file.startswith('until') and file.endswith('.log'):
-                os.rename(os.path.join(LOG_DIR, file), os.path.join(LOG_DIR, file.replace('.log', '.zip')))
+                os.rename(os.path.join(LOG_DIR, file),
+                          os.path.join(LOG_DIR, file.replace('.log', '.zip')))
 
     def get_logger(self):
         self.logger = self._setup_logger()
