@@ -37,6 +37,7 @@ def run_script(func: Callable[[ShellAPI], None], argv: List[str]):
     try:
         func(ShellAPI(system_call_handler))
     except Exception as e:
+        print(e)
         logger.error(f"FAIL :{e}")
         return -1
     logger.info("PASS")
