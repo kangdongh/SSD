@@ -16,7 +16,7 @@ class ScriptsRunner:
 
     def run(self, api: ShellAPI):
         for script in self._scripts:
-            print(f"Run {script} ... ", end=' ', flush=True)
+            print(f"{script}  ---  Run...", end='', flush=True)
             script_path = script_name_to_path(script)
             if not os.path.exists(script_path):
                 print("FAIL!")
